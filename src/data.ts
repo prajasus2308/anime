@@ -34,6 +34,18 @@ export const QUIZ_QUESTIONS = [
     options: ["Chaotic and action-packed.", "Quiet and organized library/office.", "Somewhere I can roam freely.", "A familiar place with people I know."],
     weights: { "Chaotic and action-packed.": "Guts", "Quiet and organized library/office.": "Hiyori Shiina", "Somewhere I can roam freely.": "Luffy", "A familiar place with people I know.": "Kei Karuizawa" },
     traits: { "Chaotic and action-packed.": "Adrenaline Junkie", "Quiet and organized library/office.": "Intellectual Introvert", "Somewhere I can roam freely.": "Adventurous Wanderer", "A familiar place with people I know.": "Secure Socialite" }
+  },
+  {
+    question: "How do you spend your free time?",
+    options: ["Training until I drop.", "Reading and planning.", "Partying with friends.", "Hiding and playing games."],
+    weights: { "Training until I drop.": "Goku", "Reading and planning.": "L Lawliet", "Partying with friends.": "Luffy", "Hiding and playing games.": "King" },
+    traits: { "Training until I drop.": "Dedicated Athlete", "Reading and planning.": "Intellectual Stratagy", "Partying with friends.": "Social Butterfly", "Hiding and playing games.": "Reluctant Hero" }
+  },
+  {
+    question: "What is your greatest strength?",
+    options: ["My fighting spirit.", "My intellect.", "My adaptability.", "My ability to influence others."],
+    weights: { "My fighting spirit.": "Naruto Uzumaki", "My intellect.": "Light Yagami", "My adaptability.": "Killua", "My ability to influence others.": "Aizen" },
+    traits: { "My fighting spirit.": "Unstoppable Force", "My intellect.": "Master Strategist", "My adaptability.": "Shifting Shadow", "My ability to influence others.": "Charismatic Leader" }
   }
 ];
 
