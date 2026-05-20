@@ -4,6 +4,39 @@ export interface CharacterInfo {
   description: string;
 }
 
+export const QUIZ_QUESTIONS = [
+  {
+    question: "What's your preferred approach to challenges during a crisis?",
+    options: ["Head-on confrontation, I don't back down.", "Strategic planning, I analyze first.", "Adapt and improvise, whatever works.", "Avoid if possible, it's too much effort."],
+    weights: { "Head-on confrontation": "Goku", "Strategic planning": "L Lawliet", "Adapt and improvise": "Joseph Joestar", "Avoid if possible": "Saitama" },
+    traits: { "Head-on confrontation": "Valiant Hero", "Strategic planning": "Analytical Mastermind", "Adapt and improvise": "Witty Trickster", "Avoid if possible": "Restful Soul" }
+  },
+  {
+    question: "How do you treat your allies?",
+    options: ["Protect them at all costs, they are my motivation.", "They are useful tools for my success.", "Partners in crime, let's have fun.", "Keep them at a distance, it's safer for everyone."],
+    weights: { "Protect them at all costs": "Tanjiro", "They are useful tools": "Aizen", "Partners in crime": "Luffy", "Keep them at a distance": "Kiyotaka Ayanokoji" },
+    traits: { "Protect them at all costs": "Devoted Protector", "They are useful tools": "Calculated Manipulator", "Partners in crime": "Free-spirited Companion", "Keep them at a distance": "Aloof Intellectual" }
+  },
+  {
+    question: "What's your ultimate goal in life?",
+    options: ["Become the absolute strongest.", "Find the hidden truth.", "Protect my peaceful, simple life.", "Change the corrupt world."],
+    weights: { "Become the strongest": "Ichigo Kurosaki", "Find the truth": "L Lawliet", "Protect my peaceful life": "Yoshikage Kira", "Change the world": "Eren Yeager" },
+    traits: { "Become the strongest": "Ambitions Conqueror", "Find the truth": "Curious Seeker", "Protect my peaceful life": "Tranquil Observer", "Change the world": "Revolutionary Leader" }
+  },
+  {
+    question: "How do you handle failures?",
+    options: ["I learn from them and get stronger.", "I get angry and try harder to crush it.", "I laugh it off and move to the next thing.", "I beat myself up and hide away."],
+    weights: { "I learn from them and get stronger.": "Gon Freecss", "I get angry and try harder to crush it.": "Bakugo", "I laugh it off and move to the next thing.": "Dazai Osamu", "I beat myself up and hide away.": "Airi Sakura" },
+    traits: { "I learn from them and get stronger.": "Resilient Learner", "I get angry and try harder to crush it.": "Intense Competitor", "I laugh it off and move to the next thing.": "Carefree Soul", "I beat myself up and hide away.": "Sensitive Soul" }
+  },
+  {
+    question: "What environment do you thrive in?",
+    options: ["Chaotic and action-packed.", "Quiet and organized library/office.", "Somewhere I can roam freely.", "A familiar place with people I know."],
+    weights: { "Chaotic and action-packed.": "Guts", "Quiet and organized library/office.": "Hiyori Shiina", "Somewhere I can roam freely.": "Luffy", "A familiar place with people I know.": "Kei Karuizawa" },
+    traits: { "Chaotic and action-packed.": "Adrenaline Junkie", "Quiet and organized library/office.": "Intellectual Introvert", "Somewhere I can roam freely.": "Adventurous Wanderer", "A familiar place with people I know.": "Secure Socialite" }
+  }
+];
+
 export const CHARACTER_DATA: Record<string, CharacterInfo> = {
   "Sukuna": { name: "Sukuna", quote: "You are my special.", description: "The King of Curses, known for his immense power and ruthless nature." },
   "Gun Park": { name: "Gun Park", quote: "Life is a game.", description: "The legendary fighter from Lookism." },
@@ -28,12 +61,12 @@ export const CHARACTER_DATA: Record<string, CharacterInfo> = {
   "Saitama": { name: "Saitama", quote: "I'm just a guy who's a hero for fun.", description: "The strongest hero who wins with one punch." },
   "Garou": { name: "Garou", quote: "I will be the ultimate monster.", description: "A martial arts prodigy who hunts heroes." },
   "Tanjiro": { name: "Tanjiro", quote: "Don't give up!", description: "A kind-hearted demon slayer." },
-  "Nezuko": { name: "Nezuko", quote: "...", description: "A demon who protects humans." },
+  "Nezuko": { name: "Nezuko", quote: "Mmph mmmph!", description: "A protective demon sister who travels with her brother." },
   "Inosuke": { name: "Inosuke", quote: "PIG ASSAULT!", description: "A wild demon slayer with a boar mask." },
   "Zenitsu": { name: "Zenitsu", quote: "Nezuko-chan!", description: "A demon slayer who is brave when asleep." },
   "Rengoku": { name: "Rengoku", quote: "Set your heart ablaze!", description: "The Flame Hashira." },
   "Toji Fushiguro": { name: "Toji Fushiguro", quote: "I don't need cursed energy.", description: "The Sorcerer Killer." },
-  "Megumi Fushiguro": { name: "Megumi Fushiguro", quote: "With this treasure, I summon...", description: "A talented sorcerer." },
+  "Megumi Fushiguro": { name: "Megumi Fushiguro", quote: "With this treasure, I summon...", description: "A calm, talented sorcerer who uses the Ten Shadows technique." },
   "Choso": { name: "Choso", quote: "I am a brother.", description: "A special grade cursed womb." },
   "Thorfinn": { name: "Thorfinn", quote: "I have no enemies.", description: "A warrior seeking redemption." },
   "Askeladd": { name: "Askeladd", quote: "A warrior's death is not for me.", description: "A charismatic and cunning leader." },
@@ -100,7 +133,8 @@ export const CHARACTER_DATA: Record<string, CharacterInfo> = {
   "Fubuki (Blizzard of Hell)": { name: "Fubuki (Blizzard of Hell)", quote: "I'll show you my strength.", description: "The leader of the Blizzard Group." },
   "Bang (Silver Fang)": { name: "Bang (Silver Fang)", quote: "Water Stream Rock Smashing Fist!", description: "A wise martial arts master." },
   "Speed-o'-Sound Sonic": { name: "Speed-o'-Sound Sonic", quote: "Saitama!", description: "A ninja who wants to defeat Saitama." },
-  "King": { name: "King", quote: "...", description: "Known as the strongest man, but actually..." },
+  "King": { name: "King", quote: "I might look like the strongest man, but I'm actually just a gamer.", description: "Known as the strongest man on Earth, but essentially harmless." },
+
   "Kiyotaka Ayanokoji": { name: "Kiyotaka Ayanokoji", quote: "I have never thought of others as allies or friends. I only care about winning.", description: "A mysterious, highly intelligent student who tries to live a low-profile life." },
   "Suzune Horikita": { name: "Suzune Horikita", quote: "I don't need friends. I only need results.", description: "A cold, pragmatic, and highly intelligent student striving to reach Class A." },
   "Kei Karuizawa": { name: "Kei Karuizawa", quote: "I'll do whatever it takes to survive.", description: "A popular student with a traumatic past who relies on alliances for protection." },

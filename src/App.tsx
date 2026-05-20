@@ -11,13 +11,19 @@ interface AnimeResult {
   characterName: string;
   quote: string;
   description: string;
+  traitName: string;
 }
 
-import { CHARACTER_DATA } from './data';
+import { CHARACTER_DATA, QUIZ_QUESTIONS } from './data';
 
 export default function App() {
   const [name, setName] = useState('');
   const [result, setResult] = useState<AnimeResult | null>(null);
+  
+  const [quizMode, setQuizMode] = useState(false);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [scores, setScores] = useState<Record<string, number>>({});
+  const [traitScores, setTraitScores] = useState<Record<string, number>>({});
 
   const absoluteMatches: Record<string, string> = {
     "anish": "Sukuna",
@@ -60,7 +66,36 @@ export default function App() {
     }
 
     const charInfo = CHARACTER_DATA[chosenCharacter] || { name: chosenCharacter, quote: "...", description: "..." };
-    setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description });
+    setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, traitName: "Mysterious Entrant" });
+  };
+
+  const handleQuizAnswer = (option: string) => {
+    const question = QUIZ_QUESTIONS[currentQuestionIndex];
+    const character = question.weights[option as keyof typeof question.weights];
+    const trait = question.traits[option as keyof typeof question.traits];
+    
+    setScores(prev => ({ ...prev, [character]: (prev[character] || 0) + 1 }));
+    setTraitScores(prev => ({ ...prev, [trait]: (prev[trait] || 0) + 1 }));
+
+    if (currentQuestionIndex < QUIZ_QUESTIONS.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
+    } else {
+      // Calculate result
+      const maxChar = Object.entries(scores).reduce((a, b) => (b[1] > a[1] ? b : a), [randomPool[0], 0])[0];
+      const maxTrait = Object.entries(traitScores).reduce((a, b) => (b[1] > a[1] ? b : a), ["Balanced", 0])[0];
+      
+      const charInfo = CHARACTER_DATA[maxChar] || { name: maxChar, quote: "...", description: "..." };
+      setResult({ 
+        characterName: charInfo.name, 
+        quote: charInfo.quote, 
+        description: charInfo.description, 
+        traitName: maxTrait 
+      });
+      setQuizMode(false);
+      setCurrentQuestionIndex(0);
+      setScores({});
+      setTraitScores({});
+    }
   };
 
   return (
@@ -69,28 +104,54 @@ export default function App() {
       
       <div className="w-full max-w-lg bg-[#14161d] rounded-3xl p-10 text-center shadow-2xl border border-white/5 z-10">
         <h1 className="text-4xl font-semibold -tracking-tight mb-2">Anime Matcher</h1>
-        <p className="text-gray-400 mb-10">Discover your matching character characteristically</p>
+        {!result && !quizMode && <p className="text-gray-400 mb-10">Discover your matching character characteristically</p>}
         
         {!result ? (
-          <form onSubmit={revealSoul} className="flex flex-col gap-6">
-            <input 
-              type="text" 
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 text-white text-center text-lg outline-none focus:border-red-500 transition"
-              placeholder="Enter your name" 
-              autoComplete="off"
-            />
-            <button 
-              type="submit"
-              className="w-full bg-[#e63946] text-white font-semibold rounded-2xl p-5 text-lg hover:bg-[#f14653] transition shadow-lg hover:shadow-red-500/20"
-            >
-              Find Match
-            </button>
-          </form>
+           quizMode ? (
+            <div className="flex flex-col gap-6">
+              <h2 className="text-xl">{QUIZ_QUESTIONS[currentQuestionIndex].question}</h2>
+              {QUIZ_QUESTIONS[currentQuestionIndex].options.map(option => (
+                <button
+                  key={option}
+                  onClick={() => handleQuizAnswer(option)}
+                  className="bg-[#1b1e27] border border-[#2b303f] rounded-xl p-4 hover:border-red-500 transition text-left"
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+           ) : (
+            <form onSubmit={revealSoul} className="flex flex-col gap-6">
+              <input 
+                type="text" 
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 text-white text-center text-lg outline-none focus:border-red-500 transition"
+                placeholder="Enter your name" 
+                autoComplete="off"
+              />
+              <button 
+                type="submit"
+                className="w-full bg-[#e63946] text-white font-semibold rounded-2xl p-5 text-lg hover:bg-[#f14653] transition shadow-lg hover:shadow-red-500/20"
+              >
+                Find Match
+              </button>
+              <button 
+                type="button"
+                onClick={() => setQuizMode(true)}
+                className="text-sm text-gray-500 underline hover:text-white transition"
+              >
+                Or take the personality quiz?
+              </button>
+            </form>
+           )
         ) : (
           <div className="mt-10">
-            <div className="text-xs uppercase tracking-widest text-gray-400 mb-3">Your Match</div>
+            <div className="text-xs uppercase tracking-widest text-gray-400 mb-3">Your Personality Profile</div>
+            <div className="text-xl font-bold mb-8 text-red-500">
+              {result.traitName}
+            </div>
+            <div className="text-xs uppercase tracking-widest text-gray-400 mb-3">Your Character Match</div>
             <motion.div 
               className="text-4xl font-bold mb-8 group relative cursor-help"
               initial={{ opacity: 0, y: 20, scale: 0.95 }}
