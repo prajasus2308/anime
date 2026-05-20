@@ -5,118 +5,118 @@
 
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { Share2, Loader2 } from 'lucide-react';
 import Slideshow from './components/Slideshow';
 
 interface AnimeResult {
   characterName: string;
-  quote: string;
-  description: string;
 }
 
 export default function App() {
   const [name, setName] = useState('');
   const [result, setResult] = useState<AnimeResult | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  const handleMatch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch('/api/match', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name }),
-      });
-      if (!response.ok) throw new Error('Failed to match');
-      const data = await response.json();
-      setResult(data);
-    } catch (err) {
-      console.error(err);
-      setError('Could not find your match right now. Please try again!');
-    } finally {
-      setLoading(false);
-    }
+  const absoluteMatches: Record<string, string> = {
+    "anish": "Sukuna",
+    "pratyush": "Gun Park",
+    "vedang": "Yuji",
+    "nikunj": "Rin Itoshi",
+    "kushagra": "Gojo"
   };
 
-  const handleShare = async () => {
-    const shareData = {
-      title: 'My Anime Character Match',
-      text: `I just matched with ${result?.characterName}! "${result?.quote}"`,
-      url: window.location.href,
-    };
+  const randomPool = [
+      "Eren Yeager", "Luffy", "Zoro", "Naruto Uzumaki", "Sasuke Uchiha", 
+      "Kakashi", "Killua", "Gon Freecss", "Levi Ackerman", "Light Yagami", 
+      "L Lawliet", "Goku", "Vegeta", "Ichigo Kurosaki", "Aizen", 
+      "Saitama", "Garou", "Tanjiro", "Nezuko", "Inosuke", 
+      "Zenitsu", "Rengoku", "Toji Fushiguro", "Megumi Fushiguro", "Choso", 
+      "Thorfinn", "Askeladd", "Ken Kaneki", "Mob (Shigeo)", "Reigen Arataka",
+      "Rimuru Tempest", "Sung Jin-Woo", "Guts", "Griffith", "Edward Elric",
+      "Roy Mustang", "Dazai Osamu", "Chuuya Nakahara", "Baki Hanma", "Isagi Yoichi"
+  ];
 
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
-        await navigator.clipboard.writeText(`${shareData.text} \n\nCheck it out here: ${shareData.url}`);
-        alert('Result copied to clipboard!');
-      }
-    } catch (error) {
-      console.error('Error sharing:', error);
+  const revealSoul = (e: React.FormEvent) => {
+    e.preventDefault();
+    const rawName = name.trim();
+    if (rawName === "") return;
+
+    const firstName = rawName.split(" ")[0].toLowerCase();
+
+    let chosenCharacter = "";
+
+    if (absoluteMatches.hasOwnProperty(firstName)) {
+        chosenCharacter = absoluteMatches[firstName];
+    } else {
+        const cleanFullName = rawName.toLowerCase();
+        let hash = 0;
+        for (let i = 0; i < cleanFullName.length; i++) {
+          hash = cleanFullName.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const index = Math.abs(hash) % randomPool.length;
+        chosenCharacter = randomPool[index];
     }
+
+    setResult({ characterName: chosenCharacter });
   };
 
   return (
-    <div 
-      className="min-h-screen flex flex-col items-center justify-center p-4" 
-    >
+    <div className="min-h-screen flex flex-col justify-center items-center text-white p-6">
       <Slideshow />
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white/90 backdrop-blur-sm p-8 rounded-2xl shadow-xl max-w-md w-full"
-      >
-        <h1 className="text-4xl font-extrabold text-gray-900 mb-8 text-center tracking-tight">Anime Matcher</h1>
+      
+      <div className="w-full max-w-lg bg-[#14161d] rounded-3xl p-10 text-center shadow-2xl border border-white/5 z-10">
+        <h1 className="text-4xl font-semibold -tracking-tight mb-2">Anime Matcher</h1>
+        <p className="text-gray-400 mb-10">Discover your matching character characteristically</p>
         
         {!result ? (
-          <form onSubmit={handleMatch} className="flex flex-col gap-5">
+          <form onSubmit={revealSoul} className="flex flex-col gap-6">
             <input 
               type="text" 
-              value={name} 
+              value={name}
               onChange={(e) => setName(e.target.value)}
+              className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 text-white text-center text-lg outline-none focus:border-red-500 transition"
               placeholder="Enter your name" 
-              className="p-4 border-2 border-purple-200 rounded-xl focus:border-purple-500 focus:ring-4 focus:ring-purple-500/20 outline-none transition"
-              required
+              autoComplete="off"
             />
             <button 
-              type="submit" 
-              className="px-6 py-4 bg-purple-600 text-white font-bold rounded-xl hover:bg-purple-700 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-purple-500/30 flex items-center justify-center gap-2"
-              disabled={loading}
+              type="submit"
+              className="w-full bg-[#e63946] text-white font-semibold rounded-2xl p-5 text-lg hover:bg-[#f14653] transition shadow-lg hover:shadow-red-500/20"
             >
-              {loading ? <Loader2 className="animate-spin" size={20} /> : 'Find My Match'}
+              Find Match
             </button>
-            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
           </form>
         ) : (
-          <div className="text-center py-4">
-            <h2 className="text-2xl font-semibold mb-6">You matched with: <span className="font-bold text-purple-700">{result.characterName}</span></h2>
-            <p className="italic text-gray-600 text-xl font-medium bg-purple-50 p-6 rounded-xl border border-purple-100 italic">"{result.quote}"</p>
-            <p className="text-gray-700 mt-4 text-base">{result.description}</p>
-            <div className="flex gap-4 justify-center mt-8">
-              <motion.button 
-                whileHover={{ scale: 1.05, color: '#6b21a8' }} 
-                whileTap={{ scale: 0.95 }} 
-                onClick={() => setResult(null)} 
-                className="text-sm font-semibold text-gray-600 underline"
-              >
-                Match again?
-              </motion.button>
-              <button onClick={handleShare} className="flex items-center gap-2 text-sm font-semibold text-purple-700 hover:text-purple-900 bg-purple-100 px-4 py-2 rounded-full transition">
-                <Share2 size={16} /> Share Result
-              </button>
-            </div>
+          <div className="mt-10">
+            <div className="text-xs uppercase tracking-widest text-gray-400 mb-3">Your Match</div>
+            <motion.div 
+              className="text-4xl font-bold mb-8"
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ type: "spring", stiffness: 200, damping: 12 }}
+            >
+              {result.characterName}
+            </motion.div>
+            <motion.button 
+              onClick={() => { setResult(null); setName(''); }} 
+              className="text-sm text-gray-500 hover:text-white transition"
+              whileHover={{ scale: 1.1, color: '#ffffff' }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Match again?
+            </motion.button>
           </div>
         )}
-      </motion.div>
-      
-      <footer className="mt-8 text-white font-semibold bg-black/50 p-2 rounded">
-        Sponser: Pratyush and Kushagra
-      </footer>
+      </div>
+
+      <div 
+        className="absolute bottom-6 text-sm font-bold z-10 transition-opacity opacity-100 uppercase tracking-wider"
+        style={{
+          color: '#ffffff',
+          textShadow: '0 0 5px #fff, 0 0 10px #fff, 0 0 20px #e63946, 0 0 30px #e63946'
+        }}
+      >
+        Made by Pratyush and Kushagra
+      </div>
     </div>
   );
 }
+
 
