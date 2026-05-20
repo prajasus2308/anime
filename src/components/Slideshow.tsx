@@ -15,7 +15,7 @@ export default function Slideshow() {
   useEffect(() => {
     const timer = setInterval(() => {
       setIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 120000); // 2 minutes
+    }, 5000); // 5 seconds
 
     return () => clearInterval(timer);
   }, []);
