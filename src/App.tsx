@@ -95,7 +95,7 @@ export default function App() {
               className="text-4xl font-bold mb-8 group relative cursor-help"
               initial={{ opacity: 0, y: 20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ type: "spring", stiffness: 200, damping: 12 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
             >
               {result.characterName}
               <div className="absolute left-1/2 -top-20 -translate-x-1/2 w-64 bg-white/10 backdrop-blur text-white text-sm p-4 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 border border-white/10 text-center">
