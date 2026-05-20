@@ -9,7 +9,11 @@ import Slideshow from './components/Slideshow';
 
 interface AnimeResult {
   characterName: string;
+  quote: string;
+  description: string;
 }
+
+import { CHARACTER_DATA } from './data';
 
 export default function App() {
   const [name, setName] = useState('');
@@ -55,7 +59,8 @@ export default function App() {
         chosenCharacter = randomPool[index];
     }
 
-    setResult({ characterName: chosenCharacter });
+    const charInfo = CHARACTER_DATA[chosenCharacter] || { name: chosenCharacter, quote: "...", description: "..." };
+    setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description });
   };
 
   return (
@@ -87,12 +92,16 @@ export default function App() {
           <div className="mt-10">
             <div className="text-xs uppercase tracking-widest text-gray-400 mb-3">Your Match</div>
             <motion.div 
-              className="text-4xl font-bold mb-8"
+              className="text-4xl font-bold mb-8 group relative cursor-help"
               initial={{ opacity: 0, y: 20, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ type: "spring", stiffness: 200, damping: 12 }}
             >
               {result.characterName}
+              <div className="absolute left-1/2 -top-20 -translate-x-1/2 w-64 bg-white/10 backdrop-blur text-white text-sm p-4 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 border border-white/10 text-center">
+                <p className="font-bold mb-1 italic">"{result.quote}"</p>
+                <p className="text-gray-300">{result.description}</p>
+              </div>
             </motion.div>
             <motion.button 
               onClick={() => { setResult(null); setName(''); }} 

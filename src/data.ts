@@ -1,0 +1,53 @@
+export interface CharacterInfo {
+  name: string;
+  quote: string;
+  description: string;
+}
+
+export const CHARACTER_DATA: Record<string, CharacterInfo> = {
+  "Sukuna": { name: "Sukuna", quote: "You are my special.", description: "The King of Curses, known for his immense power and ruthless nature." },
+  "Gun Park": { name: "Gun Park", quote: "Life is a game.", description: "The legendary fighter from Lookism." },
+  "Yuji": { name: "Yuji", quote: "I just want people to have a proper death.", description: "The vessel of Sukuna, determined to save people." },
+  "Rin Itoshi": { name: "Rin Itoshi", quote: "I'll destroy everything.", description: "A top-tier striker from Blue Lock." },
+  "Gojo": { name: "Gojo", quote: "Throughout heaven and earth, I alone am the honored one.", description: "The strongest jujutsu sorcerer." },
+  "Eren Yeager": { name: "Eren Yeager", quote: "I will keep moving forward.", description: "Determined to break the cycle of hatred." },
+  "Luffy": { name: "Luffy", quote: "I'm going to be the Pirate King!", description: "Captain of the Straw Hat Pirates." },
+  "Zoro": { name: "Zoro", quote: "I'll never lose again!", description: "The swordsman of the Straw Hat Pirates." },
+  "Naruto Uzumaki": { name: "Naruto Uzumaki", quote: "Believe it!", description: "The Seventh Hokage of Konoha." },
+  "Sasuke Uchiha": { name: "Sasuke Uchiha", quote: "My goal is in the darkness.", description: "The last survivor of the Uchiha clan." },
+  "Kakashi": { name: "Kakashi", quote: "Those who break the rules are scum, but those who abandon their friends are worse than scum.", description: "The Copy Ninja of the Hidden Leaf." },
+  "Killua": { name: "Killua", quote: "Baka.", description: "An elite assassin prodigy." },
+  "Gon Freecss": { name: "Gon Freecss", quote: "I'll find you, Dad!", description: "A young boy searching for his father." },
+  "Levi Ackerman": { name: "Levi Ackerman", quote: "Dedicate your heart.", description: "Humanity's strongest soldier." },
+  "Light Yagami": { name: "Light Yagami", quote: "I'll become the God of this new world.", description: "A genius student who found the Death Note." },
+  "L Lawliet": { name: "L Lawliet", quote: "I am Justice.", description: "The world's greatest detective." },
+  "Goku": { name: "Goku", quote: "I am the hope of the universe.", description: "A powerful Saiyan warrior." },
+  "Vegeta": { name: "Vegeta", quote: "I am the Prince of all Saiyans!", description: "The proud Saiyan Prince." },
+  "Ichigo Kurosaki": { name: "Ichigo Kurosaki", quote: "I protect what's mine.", description: "A substitute Shinigami." },
+  "Aizen": { name: "Aizen", quote: "Since when were you under the impression that I wasn't using Kyoka Suigetsu?", description: "A mastermind with complex plans." },
+  "Saitama": { name: "Saitama", quote: "I'm just a guy who's a hero for fun.", description: "The strongest hero who wins with one punch." },
+  "Garou": { name: "Garou", quote: "I will be the ultimate monster.", description: "A martial arts prodigy who hunts heroes." },
+  "Tanjiro": { name: "Tanjiro", quote: "Don't give up!", description: "A kind-hearted demon slayer." },
+  "Nezuko": { name: "Nezuko", quote: "...", description: "A demon who protects humans." },
+  "Inosuke": { name: "Inosuke", quote: "PIG ASSAULT!", description: "A wild demon slayer with a boar mask." },
+  "Zenitsu": { name: "Zenitsu", quote: "Nezuko-chan!", description: "A demon slayer who is brave when asleep." },
+  "Rengoku": { name: "Rengoku", quote: "Set your heart ablaze!", description: "The Flame Hashira." },
+  "Toji Fushiguro": { name: "Toji Fushiguro", quote: "I don't need cursed energy.", description: "The Sorcerer Killer." },
+  "Megumi Fushiguro": { name: "Megumi Fushiguro", quote: "With this treasure, I summon...", description: "A talented sorcerer." },
+  "Choso": { name: "Choso", quote: "I am a brother.", description: "A special grade cursed womb." },
+  "Thorfinn": { name: "Thorfinn", quote: "I have no enemies.", description: "A warrior seeking redemption." },
+  "Askeladd": { name: "Askeladd", quote: "A warrior's death is not for me.", description: "A charismatic and cunning leader." },
+  "Ken Kaneki": { name: "Ken Kaneki", quote: "I am a ghoul.", description: "A college student turned half-ghoul." },
+  "Mob (Shigeo)": { name: "Mob (Shigeo)", quote: "I'm just a normal middle schooler.", description: "A powerful psychic." },
+  "Reigen Arataka": { name: "Reigen Arataka", quote: "Don't sweat the small stuff.", description: "A charismatic con artist and psychic." },
+  "Rimuru Tempest": { name: "Rimuru Tempest", quote: "I'm not a bad slime!", description: "A slime with immense power." },
+  "Sung Jin-Woo": { name: "Sung Jin-Woo", quote: "Arise.", description: "The Shadow Monarch." },
+  "Guts": { name: "Guts", quote: "I am the struggler.", description: "A legendary mercenary warrior." },
+  "Griffith": { name: "Griffith", quote: "I will have my own kingdom.", description: "A charismatic and ambitious leader." },
+  "Edward Elric": { name: "Edward Elric", quote: "Equivalent Exchange!", description: "The Fullmetal Alchemist." },
+  "Roy Mustang": { name: "Roy Mustang", quote: "I'll burn it all.", description: "The Flame Alchemist." },
+  "Dazai Osamu": { name: "Dazai Osamu", quote: "It's a wonderful day for suicide.", description: "A mysterious detective." },
+  "Chuuya Nakahara": { name: "Chuuya Nakahara", quote: "I'll crush you.", description: "A powerful ability user." },
+  "Baki Hanma": { name: "Baki Hanma", quote: "I want to be stronger.", description: "A legendary martial artist." },
+  "Isagi Yoichi": { name: "Isagi Yoichi", quote: "I'll become the best in the world.", description: "A rising soccer star." }
+};
