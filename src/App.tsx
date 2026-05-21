@@ -11,109 +11,138 @@ interface AnimeResult {
   characterName: string;
   quote: string;
   description: string;
-  traitName: string;
   userName?: string;
 }
 
-import { CHARACTER_DATA, QUIZ_QUESTIONS, COLOUR_CHARACTER_MAP, FOOD_CHARACTER_MAP } from './data';
+import { CHARACTER_DATA, COLOUR_CHARACTER_MAP, FOOD_CHARACTER_MAP } from './data';
 
 export default function App() {
   const [name, setName] = useState('');
   const [result, setResult] = useState<AnimeResult | null>(null);
   
-  const [mode, setMode] = useState<"selection" | "colour" | "food" | "name" | "quiz" | "result">("selection");
+  const [mode, setMode] = useState<"selection" | "colour" | "food" | "name" | "result">("selection");
   const [colour, setColour] = useState('');
   const [food, setFood] = useState('');
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [scores, setScores] = useState<Record<string, number>>({});
-  const [traitScores, setTraitScores] = useState<Record<string, number>>({});
 
   const absoluteMatches: Record<string, string> = {
-    "anish": "Sukuna",
-    "pratyush": "Gun Park",
-    "vedang": "Yuji",
-    "nikunj": "Rin Itoshi",
-    "kushagra": "Gojo"
+    "red": "Sukuna",
+    "blue": "Gun Park",
+    "pink": "Yuji",
+    "violet": "Rin Itoshi",
+    "purple": "Gojo",
+    "dark green": "Gon Freecss",
+    "electric blue": "Killua Zoldyck",
+    "scarlet": "Kurapika",
+    "dark purple": "Leorio",
+    "brown": "Eren Yeager",
+    "blonde": "Armin Arlert",
+    "grey": "Levi Ackerman",
+    "tan": "Mikasa Ackerman",
+    "lime": "Beast Boy",
+    "emerald": "Midoriya",
+    "ruby": "Knives Millions",
+    "cyan": "Rimuru Tempest",
+    "azure": "Lancer",
+    "maroon": "Gaara",
+    "sand": "Temari",
+    "khaki": "Kankuro",
+    "shadow": "Shikamaru",
+    "ivory": "Griffith",
+    "charcoal": "Guts",
+    "peach": "Mitsuya",
+    "lavender": "Trunks",
+    "magenta": "Hisoka",
+    "turquoise": "Bulma",
+    "bronze": "Shiryu",
+    "copper": "Hyoga",
+    "platinum": "Tosen",
+    "obsidian": "Ulquiorra",
+    "lemon": "Mami Tomoe",
+    "mint": "Tatsumaki",
+    "coral": "Nami",
+    "denim": "Franky",
+    "rose": "Mina Ashido",
+    "wine": "Yor Forger",
+    "forest": "Sesshomaru",
+    "indigo": "Itachi Uchiha",
+    "olive": "Rock Lee",
+    "mustard": "Might Guy",
+    "ochre": "Pain",
+    "sepia": "Jiraiya",
+    "slate": "Kakashi",
+    "vermilion": "Muzan",
+    "aquamarine": "Neptune",
+    "periwinkle": "Rem",
+    "apricot": "Ram",
+    "buff": "Inosuke",
+    "cream": "Usagi Tsukino",
+    "honey": "Honey Senpai",
+    "midnight": "Dark Shadow",
+    "rust": "Kenshin Himura",
+    "amber": "Edward Elric",
+    "steel": "Alphonse Elric",
+    "smoke": "Smoker",
+    "plum": "Revy",
+    "lilac": "Shinobu Kocho",
+    "sky": "Ciel Phantomhive",
+    "moss": "Tsuyu Asui",
+    "brick": "Iida Tenya",
+    "wheat": "Vash the Stampede",
+    "fuchsia": "Anko",
+    "brass": "Jet Black",
+    "topaz": "Kyo Sohma"
   };
 
   const randomPool = [
-      "Eren Yeager", "Luffy", "Zoro", "Naruto Uzumaki", "Sasuke Uchiha", 
-      "Kakashi", "Killua", "Gon Freecss", "Levi Ackerman", "Light Yagami", 
-      "L Lawliet", "Goku", "Vegeta", "Ichigo Kurosaki", "Aizen", 
-      "Saitama", "Garou", "Tanjiro", "Nezuko", "Inosuke", 
-      "Zenitsu", "Rengoku", "Toji Fushiguro", "Megumi Fushiguro", "Choso", 
-      "Thorfinn", "Askeladd", "Ken Kaneki", "Mob (Shigeo)", "Reigen Arataka",
-      "Rimuru Tempest", "Sung Jin-Woo", "Guts", "Griffith", "Edward Elric",
-      "Roy Mustang", "Dazai Osamu", "Chuuya Nakahara", "Baki Hanma", "Isagi Yoichi"
+    "Eren Yeager", "Luffy", "Zoro", "Naruto Uzumaki", "Sasuke Uchiha",
+    "Kakashi", "Killua", "Gon Freecss", "Levi Ackerman", "Light Yagami",
+    "L Lawliet", "Goku", "Vegeta", "Ichigo Kurosaki", "Aizen",
+    "Saitama", "Garou", "Tanjiro", "Nezuko", "Inosuke",
+    "Zenitsu", "Rengoku", "Toji Fushiguro", "Megumi Fushiguro", "Choso",
+    "Thorfinn", "Askeladd", "Ken Kaneki", "Mob (Shigeo)", "Reigen Arataka",
+    "Rimuru Tempest", "Sung Jin-Woo", "Guts", "Griffith", "Edward Elric",
+    "Roy Mustang", "Dazai Osamu", "Chuuya Nakahara", "Baki Hanma", "Isagi Yoichi"
   ];
 
   const revealSoul = (e: React.FormEvent) => {
     e.preventDefault();
     const rawName = name.trim();
+
     if (rawName === "") return;
 
     const firstName = rawName.split(" ")[0].toLowerCase();
+    const cleanFirstName = firstName.toLowerCase();
 
     let chosenCharacter = "";
 
-    if (absoluteMatches.hasOwnProperty(firstName)) {
-        chosenCharacter = absoluteMatches[firstName];
+    if (absoluteMatches.hasOwnProperty(cleanFirstName)) {
+      chosenCharacter = absoluteMatches[cleanFirstName];
     } else {
-        const cleanFullName = rawName.toLowerCase();
-        let hash = 0;
-        for (let i = 0; i < cleanFullName.length; i++) {
-          hash = cleanFullName.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        const index = Math.abs(hash) % randomPool.length;
-        chosenCharacter = randomPool[index];
+      const cleanFullName = rawName.toLowerCase();
+      let hash = 0;
+      for (let i = 0; i < cleanFullName.length; i++) {
+        hash = cleanFullName.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      const index = Math.abs(hash) % randomPool.length;
+      chosenCharacter = randomPool[index];
     }
 
     const charInfo = CHARACTER_DATA[chosenCharacter] || { name: chosenCharacter, quote: "...", description: "..." };
-    setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, traitName: "Mysterious Entrant" });
+    setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, userName: name });
   };
 
-  const handleQuizAnswer = (option: string) => {
-    const question = QUIZ_QUESTIONS[currentQuestionIndex];
-    const character = question.weights[option as keyof typeof question.weights];
-    const trait = question.traits[option as keyof typeof question.traits];
-    
-    setScores(prev => ({ ...prev, [character]: (prev[character] || 0) + 1 }));
-    setTraitScores(prev => ({ ...prev, [trait]: (prev[trait] || 0) + 1 }));
-
-    if (currentQuestionIndex < QUIZ_QUESTIONS.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
-    } else {
-      // Calculate result
-      const maxChar = Object.entries(scores).reduce((a, b) => (b[1] > a[1] ? b : a), [randomPool[0], 0])[0];
-      const maxTrait = Object.entries(traitScores).reduce((a, b) => (b[1] > a[1] ? b : a), ["Balanced", 0])[0];
-      
-      const charInfo = CHARACTER_DATA[maxChar] || { name: maxChar, quote: "...", description: "..." };
-      setResult({ 
-        characterName: charInfo.name, 
-        quote: charInfo.quote, 
-        description: charInfo.description, 
-        traitName: maxTrait,
-        userName: name
-      });
-      setMode("selection");
-      setCurrentQuestionIndex(0);
-      setScores({});
-      setTraitScores({});
-    }
+  const matchByFood = (e: React.FormEvent) => {
+    e.preventDefault();
+    const chosenCharacter = FOOD_CHARACTER_MAP[food.toLowerCase()] || randomPool[0];
+    const charInfo = CHARACTER_DATA[chosenCharacter] || { name: chosenCharacter, quote: "...", description: "..." };
+    setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, userName: name });
   };
 
   const matchByColour = (e: React.FormEvent) => {
     e.preventDefault();
     const chosenCharacter = COLOUR_CHARACTER_MAP[colour.toLowerCase()] || randomPool[0];
     const charInfo = CHARACTER_DATA[chosenCharacter] || { name: chosenCharacter, quote: "...", description: "..." };
-    setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, traitName: "Colour Harmony", userName: name });
-  };
-
-  const matchByFood = (e: React.FormEvent) => {
-    e.preventDefault();
-    const chosenCharacter = FOOD_CHARACTER_MAP[food.toLowerCase()] || randomPool[1];
-    const charInfo = CHARACTER_DATA[chosenCharacter] || { name: chosenCharacter, quote: "...", description: "..." };
-    setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, traitName: "Gourmet Soul", userName: name });
+    setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, userName: name });
   };
 
   const shareResult = () => {
@@ -140,10 +169,9 @@ export default function App() {
             <div className="flex flex-col gap-4">
                <button onClick={() => setMode("colour")} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 hover:border-red-500 transition">Match by Colour</button>
                <button onClick={() => setMode("food")} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 hover:border-red-500 transition">Match by Food</button>
-               <button onClick={() => setMode("quiz")} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 hover:border-red-500 transition">Personality Quiz</button>
                <button onClick={() => setMode("name")} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 hover:border-red-500 transition">Match by Name</button>
             </div>
-          ) : mode === "colour" ? (
+           ) : mode === "colour" ? (
              <form onSubmit={matchByColour} className="flex flex-col gap-6">
                 <input type="text" value={colour} onChange={(e) => setColour(e.target.value)} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 text-center" placeholder="Enter your favorite colour" autoComplete="off" />
                 <button type="submit" className="w-full bg-[#e63946] text-white font-semibold rounded-2xl p-5">Find Match</button>
@@ -155,13 +183,6 @@ export default function App() {
                 <button type="submit" className="w-full bg-[#e63946] text-white font-semibold rounded-2xl p-5">Find Match</button>
                 <button type="button" onClick={() => setMode("selection")} className="text-gray-500 underline">Back</button>
              </form>
-          ) : mode === "quiz" ? (
-            <div className="flex flex-col gap-6">
-              <h2 className="text-xl">{QUIZ_QUESTIONS[currentQuestionIndex].question}</h2>
-              {QUIZ_QUESTIONS[currentQuestionIndex].options.map(option => (
-                <button key={option} onClick={() => handleQuizAnswer(option)} className="bg-[#1b1e27] border border-[#2b303f] rounded-xl p-4 hover:border-red-500 transition text-left">{option}</button>
-              ))}
-            </div>
           ) : (
             <form onSubmit={revealSoul} className="flex flex-col gap-6">
               <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 text-center" placeholder="Enter your name" autoComplete="off" />
@@ -171,10 +192,6 @@ export default function App() {
           )
         ) : (
           <div className="mt-10">
-            <div className="text-xs uppercase tracking-widest text-gray-400 mb-3">Your Personality Profile</div>
-            <div className="text-xl font-bold mb-8 text-red-500">
-              {result.traitName}
-            </div>
             <div className="text-xs uppercase tracking-widest text-gray-400 mb-3">Your Character Match</div>
             <motion.div 
               className="text-4xl font-bold mb-8 group relative cursor-help"
