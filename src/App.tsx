@@ -190,18 +190,21 @@ export default function App() {
             </div>
            ) : mode === "colour" ? (
              <form onSubmit={matchByColour} className="flex flex-col gap-6">
+                <p className="text-sm text-gray-400 -mb-4">What does your favorite shade reveal about your inner world? Enter a color to see which character resonates with you!</p>
                 <input type="text" value={colour} onChange={(e) => setColour(e.target.value)} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 text-center" placeholder="Enter your favorite colour" autoComplete="off" />
                 <button type="submit" className="w-full bg-[#e63946] text-white font-semibold rounded-2xl p-5">Find Match</button>
                 <button type="button" onClick={() => setMode("selection")} className="text-gray-500 underline">Back</button>
              </form>
           ) : mode === "food" ? (
              <form onSubmit={matchByFood} className="flex flex-col gap-6">
+                <p className="text-sm text-gray-400 -mb-4">Savor the flavor—let us know your favorite dish, and we'll reveal the anime character who shares your refined palate!</p>
                 <input type="text" value={food} onChange={(e) => setFood(e.target.value)} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 text-center" placeholder="Enter your favorite food" autoComplete="off" />
                 <button type="submit" className="w-full bg-[#e63946] text-white font-semibold rounded-2xl p-5">Find Match</button>
                 <button type="button" onClick={() => setMode("selection")} className="text-gray-500 underline">Back</button>
              </form>
           ) : (
             <form onSubmit={revealSoul} className="flex flex-col gap-6">
+              <p className="text-sm text-gray-400 -mb-4">Sometimes, your name holds the secret. Enter your name to uncover your true anime soulmate!</p>
               <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 text-center" placeholder="Enter your name" autoComplete="off" />
               <button type="submit" className="w-full bg-[#e63946] text-white font-semibold rounded-2xl p-5">Find Match</button>
               <button type="button" onClick={() => setMode("selection")} className="text-sm text-gray-500 underline">Back</button>
