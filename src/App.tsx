@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import Slideshow from './components/Slideshow';
 
@@ -12,15 +12,18 @@ interface AnimeResult {
   quote: string;
   description: string;
   traitName: string;
+  userName?: string;
 }
 
-import { CHARACTER_DATA, QUIZ_QUESTIONS } from './data';
+import { CHARACTER_DATA, QUIZ_QUESTIONS, COLOUR_CHARACTER_MAP, FOOD_CHARACTER_MAP } from './data';
 
 export default function App() {
   const [name, setName] = useState('');
   const [result, setResult] = useState<AnimeResult | null>(null);
   
-  const [quizMode, setQuizMode] = useState(false);
+  const [mode, setMode] = useState<"selection" | "colour" | "food" | "name" | "quiz" | "result">("selection");
+  const [colour, setColour] = useState('');
+  const [food, setFood] = useState('');
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [scores, setScores] = useState<Record<string, number>>({});
   const [traitScores, setTraitScores] = useState<Record<string, number>>({});
@@ -89,12 +92,39 @@ export default function App() {
         characterName: charInfo.name, 
         quote: charInfo.quote, 
         description: charInfo.description, 
-        traitName: maxTrait 
+        traitName: maxTrait,
+        userName: name
       });
-      setQuizMode(false);
+      setMode("selection");
       setCurrentQuestionIndex(0);
       setScores({});
       setTraitScores({});
+    }
+  };
+
+  const matchByColour = (e: React.FormEvent) => {
+    e.preventDefault();
+    const chosenCharacter = COLOUR_CHARACTER_MAP[colour.toLowerCase()] || randomPool[0];
+    const charInfo = CHARACTER_DATA[chosenCharacter] || { name: chosenCharacter, quote: "...", description: "..." };
+    setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, traitName: "Colour Harmony", userName: name });
+  };
+
+  const matchByFood = (e: React.FormEvent) => {
+    e.preventDefault();
+    const chosenCharacter = FOOD_CHARACTER_MAP[food.toLowerCase()] || randomPool[1];
+    const charInfo = CHARACTER_DATA[chosenCharacter] || { name: chosenCharacter, quote: "...", description: "..." };
+    setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, traitName: "Gourmet Soul", userName: name });
+  };
+
+  const shareResult = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'My Anime Character Match!',
+        text: `Hey! My anime character match is ${result?.characterName}${result?.userName ? ` (based on ${result.userName}'s personality)` : ''}. Check it out!`,
+        url: window.location.href,
+      }).catch(console.error);
+    } else {
+      alert("Sharing not supported on this browser.");
     }
   };
 
@@ -103,48 +133,42 @@ export default function App() {
       <Slideshow />
       
       <div className="w-full max-w-lg bg-[#14161d] rounded-3xl p-10 text-center shadow-2xl border border-white/5 z-10">
-        <h1 className="text-4xl font-semibold -tracking-tight mb-2">Anime Matcher</h1>
-        {!result && !quizMode && <p className="text-gray-400 mb-10">Discover your matching character characteristically</p>}
+        <h1 className="text-4xl font-semibold -tracking-tight mb-8">Anime Matcher</h1>
         
         {!result ? (
-           quizMode ? (
+          mode === "selection" ? (
+            <div className="flex flex-col gap-4">
+               <button onClick={() => setMode("colour")} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 hover:border-red-500 transition">Match by Colour</button>
+               <button onClick={() => setMode("food")} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 hover:border-red-500 transition">Match by Food</button>
+               <button onClick={() => setMode("quiz")} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 hover:border-red-500 transition">Personality Quiz</button>
+               <button onClick={() => setMode("name")} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 hover:border-red-500 transition">Match by Name</button>
+            </div>
+          ) : mode === "colour" ? (
+             <form onSubmit={matchByColour} className="flex flex-col gap-6">
+                <input type="text" value={colour} onChange={(e) => setColour(e.target.value)} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 text-center" placeholder="Enter your favorite colour" autoComplete="off" />
+                <button type="submit" className="w-full bg-[#e63946] text-white font-semibold rounded-2xl p-5">Find Match</button>
+                <button type="button" onClick={() => setMode("selection")} className="text-gray-500 underline">Back</button>
+             </form>
+          ) : mode === "food" ? (
+             <form onSubmit={matchByFood} className="flex flex-col gap-6">
+                <input type="text" value={food} onChange={(e) => setFood(e.target.value)} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 text-center" placeholder="Enter your favorite food" autoComplete="off" />
+                <button type="submit" className="w-full bg-[#e63946] text-white font-semibold rounded-2xl p-5">Find Match</button>
+                <button type="button" onClick={() => setMode("selection")} className="text-gray-500 underline">Back</button>
+             </form>
+          ) : mode === "quiz" ? (
             <div className="flex flex-col gap-6">
               <h2 className="text-xl">{QUIZ_QUESTIONS[currentQuestionIndex].question}</h2>
               {QUIZ_QUESTIONS[currentQuestionIndex].options.map(option => (
-                <button
-                  key={option}
-                  onClick={() => handleQuizAnswer(option)}
-                  className="bg-[#1b1e27] border border-[#2b303f] rounded-xl p-4 hover:border-red-500 transition text-left"
-                >
-                  {option}
-                </button>
+                <button key={option} onClick={() => handleQuizAnswer(option)} className="bg-[#1b1e27] border border-[#2b303f] rounded-xl p-4 hover:border-red-500 transition text-left">{option}</button>
               ))}
             </div>
-           ) : (
+          ) : (
             <form onSubmit={revealSoul} className="flex flex-col gap-6">
-              <input 
-                type="text" 
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 text-white text-center text-lg outline-none focus:border-red-500 transition"
-                placeholder="Enter your name" 
-                autoComplete="off"
-              />
-              <button 
-                type="submit"
-                className="w-full bg-[#e63946] text-white font-semibold rounded-2xl p-5 text-lg hover:bg-[#f14653] transition shadow-lg hover:shadow-red-500/20"
-              >
-                Find Match
-              </button>
-              <button 
-                type="button"
-                onClick={() => setQuizMode(true)}
-                className="text-sm text-gray-500 underline hover:text-white transition"
-              >
-                Or take the personality quiz?
-              </button>
+              <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 text-center" placeholder="Enter your name" autoComplete="off" />
+              <button type="submit" className="w-full bg-[#e63946] text-white font-semibold rounded-2xl p-5">Find Match</button>
+              <button type="button" onClick={() => setMode("selection")} className="text-sm text-gray-500 underline">Back</button>
             </form>
-           )
+          )
         ) : (
           <div className="mt-10">
             <div className="text-xs uppercase tracking-widest text-gray-400 mb-3">Your Personality Profile</div>
@@ -164,14 +188,23 @@ export default function App() {
                 <p className="text-gray-300">{result.description}</p>
               </div>
             </motion.div>
-            <motion.button 
-              onClick={() => { setResult(null); setName(''); }} 
-              className="text-sm text-gray-500 hover:text-white transition"
-              whileHover={{ scale: 1.1, color: '#ffffff' }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Match again?
-            </motion.button>
+            <div className="flex gap-4 justify-center">
+              <motion.button 
+                onClick={() => { setResult(null); setName(''); setMode("selection"); }}                className="text-sm text-gray-500 hover:text-white transition"
+                whileHover={{ scale: 1.1, color: '#ffffff' }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Match again?
+              </motion.button>
+              <motion.button 
+                onClick={shareResult}
+                className="text-sm text-gray-500 hover:text-white transition"
+                whileHover={{ scale: 1.1, color: '#ffffff' }}
+                whileTap={{ scale: 0.95 }}
+              >
+                Share Result
+              </motion.button>
+            </div>
           </div>
         )}
       </div>
@@ -183,7 +216,7 @@ export default function App() {
           textShadow: '0 0 5px #fff, 0 0 10px #fff, 0 0 20px #e63946, 0 0 30px #e63946'
         }}
       >
-        Made by Pratyush and Kushagra
+        Made by Pratyush, Kushagra, and Anish
       </div>
     </div>
   );

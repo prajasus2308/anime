@@ -166,3 +166,25 @@ export const CHARACTER_DATA: Record<string, CharacterInfo> = {
   "Takuya Yagami": { name: "Takuya Yagami", quote: "I will prove my superiority.", description: "A highly capable student hiding his true prowess." },
   "Ichika Amasawa": { name: "Ichika Amasawa", quote: "I'm just a curious observer.", description: "A playful yet manipulative student from the White Room." },
 };
+
+export const COLOUR_CHARACTER_MAP: Record<string, string> = {
+  "red": "Goku",
+  "blue": "L Lawliet",
+  "green": "Tanjiro",
+  "yellow": "Luffy",
+  "black": "Sukuna",
+  "white": "Eren Yeager",
+  "purple": "Aizen",
+  "orange": "Naruto Uzumaki"
+};
+
+export const FOOD_CHARACTER_MAP: Record<string, string> = {
+  "sushi": "Gojo",
+  "ramen": "Naruto Uzumaki",
+  "meat": "Sasha Braus",
+  "pizza": "L Lawliet",
+  "sweets": "Luffy",
+  "burgers": "Saitama",
+  "curry": "Tanjiro",
+  "fish": "Killua"
+};
