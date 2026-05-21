@@ -145,15 +145,32 @@ export default function App() {
     setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, userName: name });
   };
 
-  const shareResult = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: 'My Anime Character Match!',
-        text: `Hey! My anime character match is ${result?.characterName}${result?.userName ? ` (based on ${result.userName}'s personality)` : ''}. Check it out!`,
-        url: window.location.href,
-      }).catch(console.error);
-    } else {
-      alert("Sharing not supported on this browser.");
+  const shareResult = async () => {
+    try {
+      // Use DiceBear to generate an avatar based on character name as a surrogate
+      const imageUrl = `https://api.dicebear.com/7.x/pixel-art/png?seed=${encodeURIComponent(result!.characterName)}`;
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const file = new File([blob], "character.png", { type: "image/png" });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: 'My Anime Character Match!',
+          text: `Hey! My anime character match is ${result?.characterName}${result?.userName ? ` (based on ${result.userName}'s personality)` : ''}. Check it out!`,
+          files: [file],
+        });
+      } else if (navigator.share) {
+        // Fallback if files can't be shared
+        navigator.share({
+          title: 'My Anime Character Match!',
+          text: `Hey! My anime character match is ${result?.characterName}${result?.userName ? ` (based on ${result.userName}'s personality)` : ''}. Check it out!`,
+          url: window.location.href,
+        });
+      } else {
+        alert("Sharing not supported on this browser.");
+      }
+    } catch (error) {
+      console.error("Sharing failed", error);
     }
   };
 
