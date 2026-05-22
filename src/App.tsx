@@ -91,7 +91,19 @@ export default function App() {
             ) : (
                 <form onSubmit={mode === "name" ? revealSoul : mode === "colour" ? matchByColour : matchByFood} className="flex flex-col gap-6">
                     <p className="text-sm text-gray-400">Enter your details for your anime match!</p>
-                    <input type="text" value={mode === "name" ? name : mode === "colour" ? colour : food} onChange={(e) => mode === "name" ? setName(e.target.value) : mode === "colour" ? setColour(e.target.value) : setFood(e.target.value)} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-full p-4 text-center" placeholder={`Enter your ${mode}`} autoComplete="off" />
+                    <input 
+                      type="text" 
+                      value={mode === "name" ? name : mode === "colour" ? colour : food} 
+                      onChange={(e) => mode === "name" ? setName(e.target.value) : mode === "colour" ? setColour(e.target.value) : setFood(e.target.value)} 
+                      onKeyDown={(e) => {
+                         if (e.key === 'Enter') {
+                            playClickSound();
+                         }
+                      }}
+                      className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-full p-4 text-center" 
+                      placeholder={`Enter your ${mode}`} 
+                      autoComplete="off" 
+                    />
                     <button type="submit" className="w-full bg-red-600 text-white font-semibold rounded-full p-4">Find Match</button>
                     <button type="button" onClick={() => { playClickSound(); setMode("selection"); }} className="text-sm text-gray-500 underline">Back</button>
                 </form>
