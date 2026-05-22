@@ -327,6 +327,7 @@ export const COLOUR_CHARACTER_MAP: Record<string, string> = {
   "clay": "Claymore",
   "gunmetal": "Riza Hawkeye",
   "blossom": "Sakura Haruno"
+  
 };
 
 export const FOOD_CHARACTER_MAP: Record<string, string> = {

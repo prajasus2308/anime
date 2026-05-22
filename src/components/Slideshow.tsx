@@ -6,7 +6,9 @@ const images = [
   'https://www.image2url.com/r2/default/images/1779300841775-fadb05cd-1031-4892-9732-d6c088ee0733.png',
   'https://www.image2url.com/r2/default/images/1779300930239-5deeb6d0-b83f-43c1-937e-0efae663efbc.png',
   'https://www.image2url.com/r2/default/images/1779301000516-73837cf4-764e-466a-97dd-ce8ab596b342.png',
-  'https://wallpapercave.com/wp/wp5553151.jpg'
+  'https://wallpapercave.com/wp/wp5553151.jpg',
+  'https://wallpapercave.com/wp/wp5535573.jpg',
+  'https://wallpapercave.com/wp/wp1853123.jpg '
 ];
 
 export default function Slideshow() {
