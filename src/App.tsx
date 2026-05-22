@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Volume2, VolumeX } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import { CHARACTER_DATA, COLOUR_CHARACTER_MAP, FOOD_CHARACTER_MAP } from './data';
 import Slideshow from './components/Slideshow';
 import { playClickSound, playSuccessSound } from './lib/audio';
@@ -31,6 +32,11 @@ export default function App() {
   useEffect(() => {
     if (result) {
       playSuccessSound(isMuted);
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
     }
   }, [result, isMuted]);
 
