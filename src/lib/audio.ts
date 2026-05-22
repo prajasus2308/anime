@@ -1,4 +1,5 @@
-export const playClickSound = () => {
+export const playClickSound = (muted: boolean) => {
+    if (muted) return;
     const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
@@ -15,7 +16,8 @@ export const playClickSound = () => {
     osc.stop(audioCtx.currentTime + 0.1);
 };
 
-export const playSuccessSound = () => {
+export const playSuccessSound = (muted: boolean) => {
+    if (muted) return;
     const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
     const osc = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();

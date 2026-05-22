@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Volume2, VolumeX } from 'lucide-react';
 import { CHARACTER_DATA, COLOUR_CHARACTER_MAP, FOOD_CHARACTER_MAP } from './data';
 import Slideshow from './components/Slideshow';
 import { playClickSound, playSuccessSound } from './lib/audio';
@@ -23,18 +24,19 @@ export default function App() {
   const [mode, setMode] = useState<"landing" | "selection" | "colour" | "food" | "name">("landing");
   const [colour, setColour] = useState('');
   const [food, setFood] = useState('');
+  const [isMuted, setIsMuted] = useState(false);
 
   const randomPool = Object.keys(CHARACTER_DATA);
 
   useEffect(() => {
     if (result) {
-      playSuccessSound();
+      playSuccessSound(isMuted);
     }
-  }, [result]);
+  }, [result, isMuted]);
 
   const revealSoul = (e: React.FormEvent) => {
     e.preventDefault();
-    playClickSound();
+    playClickSound(isMuted);
     const rawName = name.trim();
     if (rawName === "") return;
     const cleanFullName = rawName.toLowerCase();
@@ -50,7 +52,7 @@ export default function App() {
 
   const matchByFood = (e: React.FormEvent) => {
     e.preventDefault();
-    playClickSound();
+    playClickSound(isMuted);
     const chosenCharacter = FOOD_CHARACTER_MAP[food.toLowerCase()] || randomPool[0];
     const charInfo = CHARACTER_DATA[chosenCharacter];
     setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, userName: name });
@@ -58,7 +60,7 @@ export default function App() {
 
   const matchByColour = (e: React.FormEvent) => {
     e.preventDefault();
-    playClickSound();
+    playClickSound(isMuted);
     const chosenCharacter = COLOUR_CHARACTER_MAP[colour.toLowerCase()] || randomPool[0];
     const charInfo = CHARACTER_DATA[chosenCharacter];
     setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, userName: name });
@@ -66,10 +68,16 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-black/70 text-white flex flex-col justify-center items-center p-6 font-sans">
+      <button 
+        onClick={() => setIsMuted(!isMuted)}
+        className="fixed top-6 right-6 p-2 rounded-full bg-white/10 hover:bg-white/20 transition z-50"
+      >
+        {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
+      </button>
       <Slideshow />
       <AnimatePresence mode="wait">
         {!result ? (
-          <motion.div 
+            <motion.div 
             key={mode}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -80,13 +88,13 @@ export default function App() {
               <div className="space-y-6">
                 <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-purple-500">AnimeSoul Matcher</h1>
                 <p className="text-xl text-gray-300">Discover your anime alter ego in seconds.</p>
-                <button onClick={() => { playClickSound(); setMode("selection"); }} className="w-full bg-white text-black font-semibold rounded-full p-4 hover:bg-gray-200 transition">Start Match</button>
+                <button onClick={() => { playClickSound(isMuted); setMode("selection"); }} className="w-full bg-white text-black font-semibold rounded-full p-4 hover:bg-gray-200 transition">Start Match</button>
               </div>
             ) : mode === "selection" ? (
               <div className="flex flex-col gap-4">
-                <button onClick={() => { playClickSound(); setMode("colour"); }} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-full p-4 hover:border-red-500 transition">Match by Colour</button>
-                <button onClick={() => { playClickSound(); setMode("food"); }} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-full p-4 hover:border-red-500 transition">Match by Food</button>
-                <button onClick={() => { playClickSound(); setMode("name"); }} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-full p-4 hover:border-red-500 transition">Match by Name</button>
+                <button onClick={() => { playClickSound(isMuted); setMode("colour"); }} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-full p-4 hover:border-red-500 transition">Match by Colour</button>
+                <button onClick={() => { playClickSound(isMuted); setMode("food"); }} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-full p-4 hover:border-red-500 transition">Match by Food</button>
+                <button onClick={() => { playClickSound(isMuted); setMode("name"); }} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-full p-4 hover:border-red-500 transition">Match by Name</button>
               </div>
             ) : (
                 <form onSubmit={mode === "name" ? revealSoul : mode === "colour" ? matchByColour : matchByFood} className="flex flex-col gap-6">
@@ -97,15 +105,22 @@ export default function App() {
                       onChange={(e) => mode === "name" ? setName(e.target.value) : mode === "colour" ? setColour(e.target.value) : setFood(e.target.value)} 
                       onKeyDown={(e) => {
                          if (e.key === 'Enter') {
-                            playClickSound();
+                            playClickSound(isMuted);
                          }
                       }}
                       className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-full p-4 text-center" 
                       placeholder={`Enter your ${mode}`} 
                       autoComplete="off" 
                     />
-                    <button type="submit" className="w-full bg-red-600 text-white font-semibold rounded-full p-4">Find Match</button>
-                    <button type="button" onClick={() => { playClickSound(); setMode("selection"); }} className="text-sm text-gray-500 underline">Back</button>
+                    <motion.button 
+                      type="submit" 
+                      className="w-full bg-red-600 text-white font-semibold rounded-full p-4"
+                      animate={{ scale: [1, 1.02, 1] }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    >
+                      Find Match
+                    </motion.button>
+                    <button type="button" onClick={() => { playClickSound(isMuted); setMode("selection"); }} className="text-sm text-gray-500 underline">Back</button>
                 </form>
             )}
           </motion.div>
@@ -135,7 +150,11 @@ export default function App() {
         )}
       </AnimatePresence>
       <div 
-        className="fixed bottom-6 text-sm font-bold opacity-60 uppercase tracking-wider text-gray-500"
+        className="fixed bottom-6 text-sm font-bold z-10 transition-opacity opacity-100 uppercase tracking-wider"
+        style={{
+          color: '#ffffff',
+          textShadow: '0 0 5px #fff, 0 0 10px #fff, 0 0 20px #e63946, 0 0 30px #e63946'
+        }}
       >
         Made by Pratyush, Kushagra, and Anish
       </div>
