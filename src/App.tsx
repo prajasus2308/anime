@@ -3,9 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { CHARACTER_DATA, COLOUR_CHARACTER_MAP, FOOD_CHARACTER_MAP } from './data';
 import Slideshow from './components/Slideshow';
+import { playClickSound, playSuccessSound } from './lib/audio';
 
 interface AnimeResult {
   characterName: string;
@@ -14,244 +16,114 @@ interface AnimeResult {
   userName?: string;
 }
 
-import { CHARACTER_DATA, COLOUR_CHARACTER_MAP, FOOD_CHARACTER_MAP } from './data';
-
 export default function App() {
   const [name, setName] = useState('');
   const [result, setResult] = useState<AnimeResult | null>(null);
   
-  const [mode, setMode] = useState<"selection" | "colour" | "food" | "name" | "result">("selection");
+  const [mode, setMode] = useState<"landing" | "selection" | "colour" | "food" | "name">("landing");
   const [colour, setColour] = useState('');
   const [food, setFood] = useState('');
 
-  const absoluteMatches: Record<string, string> = {
-    "red": "Sukuna",
-    "blue": "Gun Park",
-    "pink": "Yuji",
-    "violet": "Rin Itoshi",
-    "purple": "Gojo",
-    "dark green": "Gon Freecss",
-    "electric blue": "Killua Zoldyck",
-    "scarlet": "Kurapika",
-    "dark purple": "Leorio",
-    "brown": "Eren Yeager",
-    "blonde": "Armin Arlert",
-    "grey": "Levi Ackerman",
-    "tan": "Mikasa Ackerman",
-    "lime": "Beast Boy",
-    "emerald": "Midoriya",
-    "ruby": "Knives Millions",
-    "cyan": "Rimuru Tempest",
-    "azure": "Lancer",
-    "maroon": "Gaara",
-    "sand": "Temari",
-    "khaki": "Kankuro",
-    "shadow": "Shikamaru",
-    "ivory": "Griffith",
-    "charcoal": "Guts",
-    "peach": "Mitsuya",
-    "lavender": "Trunks",
-    "magenta": "Hisoka",
-    "turquoise": "Bulma",
-    "bronze": "Shiryu",
-    "copper": "Hyoga",
-    "platinum": "Tosen",
-    "obsidian": "Ulquiorra",
-    "lemon": "Mami Tomoe",
-    "mint": "Tatsumaki",
-    "coral": "Nami",
-    "denim": "Franky",
-    "rose": "Mina Ashido",
-    "wine": "Yor Forger",
-    "forest": "Sesshomaru",
-    "indigo": "Itachi Uchiha",
-    "olive": "Rock Lee",
-    "mustard": "Might Guy",
-    "ochre": "Pain",
-    "sepia": "Jiraiya",
-    "slate": "Kakashi",
-    "vermilion": "Muzan",
-    "aquamarine": "Neptune",
-    "periwinkle": "Rem",
-    "apricot": "Ram",
-    "buff": "Inosuke",
-    "cream": "Usagi Tsukino",
-    "honey": "Honey Senpai",
-    "midnight": "Dark Shadow",
-    "rust": "Kenshin Himura",
-    "amber": "Edward Elric",
-    "steel": "Alphonse Elric",
-    "smoke": "Smoker",
-    "plum": "Revy",
-    "lilac": "Shinobu Kocho",
-    "sky": "Ciel Phantomhive",
-    "moss": "Tsuyu Asui",
-    "brick": "Iida Tenya",
-    "wheat": "Vash the Stampede",
-    "fuchsia": "Anko",
-    "brass": "Jet Black",
-    "topaz": "Kyo Sohma"
-  };
+  const randomPool = Object.keys(CHARACTER_DATA);
 
-  const randomPool = [
-    "Eren Yeager", "Luffy", "Zoro", "Naruto Uzumaki", "Sasuke Uchiha",
-    "Kakashi", "Killua", "Gon Freecss", "Levi Ackerman", "Light Yagami",
-    "L Lawliet", "Goku", "Vegeta", "Ichigo Kurosaki", "Aizen",
-    "Saitama", "Garou", "Tanjiro", "Nezuko", "Inosuke",
-    "Zenitsu", "Rengoku", "Toji Fushiguro", "Megumi Fushiguro", "Choso",
-    "Thorfinn", "Askeladd", "Ken Kaneki", "Mob (Shigeo)", "Reigen Arataka",
-    "Rimuru Tempest", "Sung Jin-Woo", "Guts", "Griffith", "Edward Elric",
-    "Roy Mustang", "Dazai Osamu", "Chuuya Nakahara", "Baki Hanma", "Isagi Yoichi"
-  ];
+  useEffect(() => {
+    if (result) {
+      playSuccessSound();
+    }
+  }, [result]);
 
   const revealSoul = (e: React.FormEvent) => {
     e.preventDefault();
+    playClickSound();
     const rawName = name.trim();
-
     if (rawName === "") return;
-
-    const firstName = rawName.split(" ")[0].toLowerCase();
-    const cleanFirstName = firstName.toLowerCase();
-
-    let chosenCharacter = "";
-
-    if (absoluteMatches.hasOwnProperty(cleanFirstName)) {
-      chosenCharacter = absoluteMatches[cleanFirstName];
-    } else {
-      const cleanFullName = rawName.toLowerCase();
-      let hash = 0;
-      for (let i = 0; i < cleanFullName.length; i++) {
+    const cleanFullName = rawName.toLowerCase();
+    let hash = 0;
+    for (let i = 0; i < cleanFullName.length; i++) {
         hash = cleanFullName.charCodeAt(i) + ((hash << 5) - hash);
-      }
-      const index = Math.abs(hash) % randomPool.length;
-      chosenCharacter = randomPool[index];
     }
-
-    const charInfo = CHARACTER_DATA[chosenCharacter] || { name: chosenCharacter, quote: "...", description: "..." };
+    const index = Math.abs(hash) % randomPool.length;
+    const chosenCharacter = randomPool[index];
+    const charInfo = CHARACTER_DATA[chosenCharacter];
     setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, userName: name });
   };
 
   const matchByFood = (e: React.FormEvent) => {
     e.preventDefault();
+    playClickSound();
     const chosenCharacter = FOOD_CHARACTER_MAP[food.toLowerCase()] || randomPool[0];
-    const charInfo = CHARACTER_DATA[chosenCharacter] || { name: chosenCharacter, quote: "...", description: "..." };
+    const charInfo = CHARACTER_DATA[chosenCharacter];
     setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, userName: name });
   };
 
   const matchByColour = (e: React.FormEvent) => {
     e.preventDefault();
+    playClickSound();
     const chosenCharacter = COLOUR_CHARACTER_MAP[colour.toLowerCase()] || randomPool[0];
-    const charInfo = CHARACTER_DATA[chosenCharacter] || { name: chosenCharacter, quote: "...", description: "..." };
+    const charInfo = CHARACTER_DATA[chosenCharacter];
     setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, userName: name });
   };
 
-  const shareResult = async () => {
-    try {
-      // Use DiceBear to generate an avatar based on character name as a surrogate
-      const imageUrl = `https://api.dicebear.com/7.x/pixel-art/png?seed=${encodeURIComponent(result!.characterName)}`;
-      const response = await fetch(imageUrl);
-      const blob = await response.blob();
-      const file = new File([blob], "character.png", { type: "image/png" });
-
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          title: 'My Anime Character Match!',
-          text: `Hey! My anime character match is ${result?.characterName}${result?.userName ? ` (based on ${result.userName}'s personality)` : ''}. Check it out!`,
-          files: [file],
-        });
-      } else if (navigator.share) {
-        // Fallback if files can't be shared
-        navigator.share({
-          title: 'My Anime Character Match!',
-          text: `Hey! My anime character match is ${result?.characterName}${result?.userName ? ` (based on ${result.userName}'s personality)` : ''}. Check it out!`,
-          url: window.location.href,
-        });
-      } else {
-        alert("Sharing not supported on this browser.");
-      }
-    } catch (error) {
-      console.error("Sharing failed", error);
-    }
-  };
-
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center text-white p-6">
+    <div className="min-h-screen bg-black/70 text-white flex flex-col justify-center items-center p-6 font-sans">
       <Slideshow />
-      
-      <div className="w-full max-w-lg bg-[#14161d] rounded-3xl p-10 text-center shadow-2xl border border-white/5 z-10">
-        <h1 className="text-4xl font-semibold -tracking-tight mb-8">Anime Matcher</h1>
-        
+      <AnimatePresence mode="wait">
         {!result ? (
-          mode === "selection" ? (
-            <div className="flex flex-col gap-4">
-               <button onClick={() => setMode("colour")} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 hover:border-red-500 transition">Match by Colour</button>
-               <button onClick={() => setMode("food")} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 hover:border-red-500 transition">Match by Food</button>
-               <button onClick={() => setMode("name")} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 hover:border-red-500 transition">Match by Name</button>
-            </div>
-           ) : mode === "colour" ? (
-             <form onSubmit={matchByColour} className="flex flex-col gap-6">
-                <p className="text-sm text-gray-400 -mb-4">What does your favorite shade reveal about your inner world? Enter a color to see which character resonates with you!</p>
-                <input type="text" value={colour} onChange={(e) => setColour(e.target.value)} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 text-center" placeholder="Enter your favorite colour" autoComplete="off" />
-                <button type="submit" className="w-full bg-[#e63946] text-white font-semibold rounded-2xl p-5">Find Match</button>
-                <button type="button" onClick={() => setMode("selection")} className="text-gray-500 underline">Back</button>
-             </form>
-          ) : mode === "food" ? (
-             <form onSubmit={matchByFood} className="flex flex-col gap-6">
-                <p className="text-sm text-gray-400 -mb-4">Savor the flavor—let us know your favorite dish, and we'll reveal the anime character who shares your refined palate!</p>
-                <input type="text" value={food} onChange={(e) => setFood(e.target.value)} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 text-center" placeholder="Enter your favorite food" autoComplete="off" />
-                <button type="submit" className="w-full bg-[#e63946] text-white font-semibold rounded-2xl p-5">Find Match</button>
-                <button type="button" onClick={() => setMode("selection")} className="text-gray-500 underline">Back</button>
-             </form>
-          ) : (
-            <form onSubmit={revealSoul} className="flex flex-col gap-6">
-              <p className="text-sm text-gray-400 -mb-4">Sometimes, your name holds the secret. Enter your name to uncover your true anime soulmate!</p>
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-2xl p-5 text-center" placeholder="Enter your name" autoComplete="off" />
-              <button type="submit" className="w-full bg-[#e63946] text-white font-semibold rounded-2xl p-5">Find Match</button>
-              <button type="button" onClick={() => setMode("selection")} className="text-sm text-gray-500 underline">Back</button>
-            </form>
-          )
-        ) : (
-          <div className="mt-10">
-            <div className="text-xs uppercase tracking-widest text-gray-400 mb-3">Your Character Match</div>
-            <motion.div 
-              className="text-4xl font-bold mb-8 group relative cursor-help"
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-            >
-              {result.characterName}
-              <div className="absolute left-1/2 -top-20 -translate-x-1/2 w-64 bg-white/10 backdrop-blur text-white text-sm p-4 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 border border-white/10 text-center">
-                <p className="font-bold mb-1 italic">"{result.quote}"</p>
-                <p className="text-gray-300">{result.description}</p>
+          <motion.div 
+            key={mode}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="w-full max-w-md bg-[#111111]/80 border border-white/10 rounded-3xl p-8 text-center shadow-2xl backdrop-blur-md"
+          >
+            {mode === "landing" ? (
+              <div className="space-y-6">
+                <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-purple-500">AnimeSoul Matcher</h1>
+                <p className="text-xl text-gray-300">Discover your anime alter ego in seconds.</p>
+                <button onClick={() => { playClickSound(); setMode("selection"); }} className="w-full bg-white text-black font-semibold rounded-full p-4 hover:bg-gray-200 transition">Start Match</button>
               </div>
+            ) : mode === "selection" ? (
+              <div className="flex flex-col gap-4">
+                <button onClick={() => { playClickSound(); setMode("colour"); }} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-full p-4 hover:border-red-500 transition">Match by Colour</button>
+                <button onClick={() => { playClickSound(); setMode("food"); }} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-full p-4 hover:border-red-500 transition">Match by Food</button>
+                <button onClick={() => { playClickSound(); setMode("name"); }} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-full p-4 hover:border-red-500 transition">Match by Name</button>
+              </div>
+            ) : (
+                <form onSubmit={mode === "name" ? revealSoul : mode === "colour" ? matchByColour : matchByFood} className="flex flex-col gap-6">
+                    <p className="text-sm text-gray-400">Enter your details for your anime match!</p>
+                    <input type="text" value={mode === "name" ? name : mode === "colour" ? colour : food} onChange={(e) => mode === "name" ? setName(e.target.value) : mode === "colour" ? setColour(e.target.value) : setFood(e.target.value)} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-full p-4 text-center" placeholder={`Enter your ${mode}`} autoComplete="off" />
+                    <button type="submit" className="w-full bg-red-600 text-white font-semibold rounded-full p-4">Find Match</button>
+                    <button type="button" onClick={() => { playClickSound(); setMode("selection"); }} className="text-sm text-gray-500 underline">Back</button>
+                </form>
+            )}
+          </motion.div>
+        ) : (
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="w-full max-w-md bg-[#111111]/80 border border-white/10 rounded-3xl p-8 text-center shadow-2xl backdrop-blur-md"
+            >
+                <div className="text-xs uppercase tracking-widest text-gray-400 mb-3">Your Character Match</div>
+                <div className="text-4xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-purple-400">
+                    {result.characterName}
+                </div>
+                <div className="bg-[#1b1e27] p-6 rounded-2xl mb-8 border border-white/5">
+                    <p className="font-bold mb-4 text-lg italic">"{result.quote}"</p>
+                    <p className="text-gray-400">{result.description}</p>
+                </div>
+                <motion.button 
+                    onClick={() => { setResult(null); setName(''); setColour(''); setFood(''); setMode("selection"); }}
+                    className="w-full bg-white text-black font-semibold rounded-full p-4 hover:bg-gray-200 transition"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                >
+                    Match again?
+                </motion.button>
             </motion.div>
-            <div className="flex gap-4 justify-center">
-              <motion.button 
-                onClick={() => { setResult(null); setName(''); setMode("selection"); }}                className="text-sm text-gray-500 hover:text-white transition"
-                whileHover={{ scale: 1.1, color: '#ffffff' }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Match again?
-              </motion.button>
-              <motion.button 
-                onClick={shareResult}
-                className="text-sm text-gray-500 hover:text-white transition"
-                whileHover={{ scale: 1.1, color: '#ffffff' }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Share Result
-              </motion.button>
-            </div>
-          </div>
         )}
-      </div>
-
+      </AnimatePresence>
       <div 
-        className="absolute bottom-6 text-sm font-bold z-10 transition-opacity opacity-100 uppercase tracking-wider"
-        style={{
-          color: '#ffffff',
-          textShadow: '0 0 5px #fff, 0 0 10px #fff, 0 0 20px #e63946, 0 0 30px #e63946'
-        }}
+        className="fixed bottom-6 text-sm font-bold opacity-60 uppercase tracking-wider text-gray-500"
       >
         Made by Pratyush, Kushagra, and Anish
       </div>

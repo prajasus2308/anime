@@ -235,10 +235,7 @@ export const CHARACTER_DATA: Record<string, CharacterInfo> = {
   "Sailor Neptune": { name: "Sailor Neptune", quote: "Deep reflection!", description: "A guardian with the power of the sea." },
   "Michiru Kaiou": { name: "Michiru Kaiou", quote: "The sea is calling.", description: "A talented violinist and Sailor Guardian." },
   "Fushiguro Megumi": { name: "Fushiguro Megumi", quote: "With this treasure I summon, Eight-Handled Sword Divergent Sila Divine General Mahoraga!", description: "A calm, talented sorcerer who uses the Ten Shadows technique." },
-  "Sasuke Uchiha": { name: "Sasuke Uchiha", quote: "My goal is in the darkness.", description: "The last survivor of the Uchiha clan." },
-  "Ichigo Kurosaki": { name: "Ichigo Kurosaki", quote: "I protect what's mine.", description: "A substitute Shinigami." },
   "Gintoki Sakata": { name: "Gintoki Sakata", quote: "Strawberry milk!", description: "The silver-haired samurai who runs the Yorozuya." },
-  "Gilgamesh": { name: "Gilgamesh", quote: "Faker!", description: "The king of heroes." },
   "Ash Ketchum": { name: "Ash Ketchum", quote: "I choose you!", description: "A young trainer aiming to be a Pokémon master." },
   "Iida Tenya": { name: "Iida Tenya", quote: "I am the class representative!", description: "A serious and highly motivated hero in training." },
   "Tsuyu Asui": { name: "Tsuyu Asui", quote: "Ribbit.", description: "A frog-like hero student." },
@@ -251,7 +248,6 @@ export const CHARACTER_DATA: Record<string, CharacterInfo> = {
   "Itoshi Rin": { name: "Itoshi Rin", quote: "Luck is for the weak.", description: "A talented and intense striker from Blue Lock." },
   "Hinata Hyuga": { name: "Hinata Hyuga", quote: "I'll always be behind you.", description: "A gentle ninja who loves Naruto." },
   "Claymore": { name: "Claymore", quote: "I fight to protect the weak.", description: "A warrior with immense strength." },
-  "Riza Hawkeye": { name: "Riza Hawkeye", quote: "I'll protect you, Colonel.", description: "Mustang's loyal subordinate." },
   "Sakura Haruno": { name: "Sakura Haruno", quote: "I've learned a lot from Tsunade-sama!", description: "A brilliant medical ninja." }
 };
 
