@@ -2,9 +2,19 @@ let audioCtx: AudioContext | null = null;
 let ambientOscillators: OscillatorNode[] = [];
 let ambientGain: GainNode | null = null;
 
+const getContext = () => {
+    if (!audioCtx) {
+        audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+    return audioCtx;
+};
+
 export const playClickSound = (muted: boolean) => {
     if (muted) return;
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const ctx = getContext();
     const osc = ctx.createOscillator();
     const gainNode = ctx.createGain();
     
@@ -22,7 +32,7 @@ export const playClickSound = (muted: boolean) => {
 
 export const playSuccessSound = (muted: boolean) => {
     if (muted) return;
-    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const ctx = getContext();
     const osc = ctx.createOscillator();
     const gainNode = ctx.createGain();
     
@@ -40,21 +50,20 @@ export const playSuccessSound = (muted: boolean) => {
 };
 
 export const toggleAmbientAudio = (playing: boolean) => {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    }
+    const ctx = getContext();
 
     if (playing) {
-        ambientGain = audioCtx.createGain();
-        ambientGain.gain.setValueAtTime(0.02, audioCtx.currentTime);
-        ambientGain.connect(audioCtx.destination);
+        if (ambientGain) return; // Prevent multiple instances
+        ambientGain = ctx.createGain();
+        ambientGain.gain.setValueAtTime(0.02, ctx.currentTime);
+        ambientGain.connect(ctx.destination);
 
         // Simple lo-fi drone chord (Cmaj7-like using oscillators)
         const freqs = [130.81, 164.81, 196.00, 246.94]; // C3, E3, G3, B3
         freqs.forEach(f => {
-            const osc = audioCtx!.createOscillator();
+            const osc = ctx.createOscillator();
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(f, audioCtx!.currentTime);
+            osc.frequency.setValueAtTime(f, ctx.currentTime);
             osc.connect(ambientGain!);
             osc.start();
             ambientOscillators.push(osc);

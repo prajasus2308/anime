@@ -326,27 +326,7 @@ export const COLOUR_CHARACTER_MAP: Record<string, string> = {
   "sunset": "Hinata Hyuga",
   "clay": "Claymore",
   "gunmetal": "Riza Hawkeye",
-  "blossom": "Sakura Haruno",
-  "light blue": "Rimuru Tempest",
-  "dark green": "Zoro",
-  "neon green": "Tatsumaki (Tornado of Terror)",
-  "matte black": "Toji Fushiguro",
-  "metallic silver": "Genos",
-  "golden": "Gilgamesh",
-  "icy white": "Shouto Todoroki",
-  "blood red": "Alucard",
-  "electric blue": "Killua",
-  "forest green": "Gon Freecss",
-  "deep purple": "Gojo",
-  "shadow grey": "Shikamaru Nara",
-  "gunmetal": "Levi Ackerman",
-  "rose gold": "Mina Ashido",
-  "ocean blue": "Itoshi Rin",
-  "emerald": "Midorima Shintaro",
-  "burnt orange": "Bakugo Katsuki",
-  "pearl white": "Kanna",
-  "pitch black": "Aizen",
-  "sky blue": "Ciel Phantomhive"
+  "blossom": "Sakura Haruno"
 };
 
 export const FOOD_CHARACTER_MAP: Record<string, string> = {

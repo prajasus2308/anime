@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Volume2, VolumeX, Music, Home, Compass, Clock } from 'lucide-react';
+import { Volume2, VolumeX, Music, Home, Compass, Clock, Share2 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { CHARACTER_DATA, COLOUR_CHARACTER_MAP, FOOD_CHARACTER_MAP, NAME_CHARACTER_MAP } from './data';
 import Slideshow from './components/Slideshow';
@@ -28,13 +28,32 @@ export default function App() {
   const [isMuted, setIsMuted] = useState(false);
   const [isAmbientPlaying, setIsAmbientPlaying] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [streak, setStreak] = useState(0);
+  const [confettiIntensity, setConfettiIntensity] = useState(150);
+  const [currentUser, setCurrentUser] = useState<string | null>(null);
+  const [dailyProgress, setDailyProgress] = useState({
+      colorMatched: false,
+      foodMatched: false
+  });
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState<AnimeResult[]>([]);
   
+  const lastResultRef = useRef<AnimeResult | null>(null);
+
+  const updateQuest = (type: 'colorMatched' | 'foodMatched') => {
+      setDailyProgress(prev => {
+          const newProgress = { ...prev, [type]: true };
+          localStorage.setItem('dailyProgress', JSON.stringify(newProgress));
+          return newProgress;
+      });
+  };
+
   const handleMatchAgain = () => {
     playClickSound(isMuted);
+    playSuccessSound(isMuted);
     setIsFlipped(true);
     setTimeout(() => {
+        lastResultRef.current = null;
         setResult(null); setName(''); setColour(''); setFood(''); setMode("selection");
         setIsFlipped(false);
     }, 600);
@@ -47,6 +66,27 @@ export default function App() {
     if (savedHistory) {
       setHistory(JSON.parse(savedHistory));
     }
+    const savedStreak = localStorage.getItem('animeStreak');
+    if (savedStreak) setStreak(parseInt(savedStreak));
+
+    const savedIntensity = localStorage.getItem('confettiIntensity');
+    if (savedIntensity) setConfettiIntensity(parseInt(savedIntensity));
+    
+    const savedUser = localStorage.getItem('userName');
+    if (savedUser) setCurrentUser(savedUser);
+
+    const savedProgress = localStorage.getItem('dailyProgress');
+    const lastDate = localStorage.getItem('lastQuestDate');
+    const today = new Date().toDateString();
+
+    if (lastDate !== today) {
+        const newProgress = { colorMatched: false, foodMatched: false };
+        setDailyProgress(newProgress);
+        localStorage.setItem('dailyProgress', JSON.stringify(newProgress));
+        localStorage.setItem('lastQuestDate', today);
+    } else if (savedProgress) {
+        setDailyProgress(JSON.parse(savedProgress));
+    }
   }, []);
 
   useEffect(() => {
@@ -54,24 +94,55 @@ export default function App() {
   }, [isAmbientPlaying]);
 
   useEffect(() => {
-    if (result) {
-      playSuccessSound(isMuted);
+    if (result && result !== lastResultRef.current) {
+      lastResultRef.current = result;
       confetti({
-        particleCount: 150,
+        particleCount: confettiIntensity,
         spread: 70,
         origin: { y: 0.6 }
       });
       
       // Update history
-      const newHistory = [...history, result];
-      setHistory(newHistory);
-      localStorage.setItem('animeHistory', JSON.stringify(newHistory));
+      setHistory(prev => {
+          const newHistory = [...prev, result];
+          localStorage.setItem('animeHistory', JSON.stringify(newHistory));
+          return newHistory;
+      });
+
+      if (result.userName && result.userName.trim() !== "") {
+          setCurrentUser(result.userName);
+          localStorage.setItem('userName', result.userName);
+      }
+
+      // Streak logic
+      const today = new Date().toDateString();
+      const lastDate = localStorage.getItem('lastMatchDate');
+      
+      setStreak(prevStreak => {
+          let newStreak = 1;
+          if (lastDate) {
+              const lastDateObj = new Date(lastDate);
+              const todayObj = new Date();
+              const diffMs = todayObj.getTime() - lastDateObj.getTime();
+              const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+              
+              if (diffDays === 1) {
+                  newStreak = prevStreak + 1;
+              } else if (diffDays === 0) {
+                  newStreak = prevStreak;
+              }
+          }
+          localStorage.setItem('animeStreak', newStreak.toString());
+          localStorage.setItem('lastMatchDate', today);
+          return newStreak;
+      });
     }
   }, [result, isMuted]);
 
   const revealSoul = (e: React.FormEvent) => {
     e.preventDefault();
     playClickSound(isMuted);
+    playSuccessSound(isMuted);
     const rawName = name.trim();
     if (rawName === "") return;
     const cleanFullName = rawName.toLowerCase();
@@ -94,22 +165,38 @@ export default function App() {
   const matchByFood = (e: React.FormEvent) => {
     e.preventDefault();
     playClickSound(isMuted);
+    playSuccessSound(isMuted);
     const chosenCharacter = FOOD_CHARACTER_MAP[food.toLowerCase()] || randomPool[0];
     const charInfo = CHARACTER_DATA[chosenCharacter];
+    updateQuest('foodMatched');
     setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, userName: name });
   };
 
   const matchByColour = (e: React.FormEvent) => {
     e.preventDefault();
     playClickSound(isMuted);
+    playSuccessSound(isMuted);
     const chosenCharacter = COLOUR_CHARACTER_MAP[colour.toLowerCase()] || randomPool[0];
     const charInfo = CHARACTER_DATA[chosenCharacter];
+    updateQuest('colorMatched');
     setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, userName: name });
   };
 
   return (
     <div className="min-h-screen bg-black/70 text-white flex flex-col justify-center items-center p-6 font-sans pb-24">
+      <div className="fixed top-6 left-6 z-50 flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full backdrop-blur-md">
+        {currentUser && <span className="text-sm font-bold text-white">{currentUser}</span>}
+        {streak > 0 && <span className="text-xs bg-pink-500 text-white px-2 py-0.5 rounded-full font-bold">🔥 {streak}</span>}
+      </div>
       <div className="fixed top-6 right-6 flex gap-2 z-50">
+        <div className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-full">
+            <label className="text-xs">Intensity</label>
+            <input type="range" min="50" max="500" value={confettiIntensity} onChange={(e) => {
+                const val = parseInt(e.target.value);
+                setConfettiIntensity(val);
+                localStorage.setItem('confettiIntensity', val.toString());
+            }} />
+        </div>
         <button 
           onClick={() => setIsAmbientPlaying(!isAmbientPlaying)}
           className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition"
@@ -157,6 +244,19 @@ export default function App() {
               <div className="space-y-6">
                 <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-300 to-blue-300">AnimeSoul Matcher</h1>
                 <p className="text-xl text-gray-300">Discover your anime alter ego in seconds.</p>
+                
+                <div className="bg-[#1b1e27] rounded-3xl p-6 border border-white/5 text-left space-y-3">
+                    <h3 className="font-bold text-pink-300">Daily Quests</h3>
+                    <div className="flex items-center gap-2">
+                        <div className={`w-4 h-4 rounded-full ${dailyProgress.colorMatched ? 'bg-green-500' : 'bg-gray-600'}`}></div>
+                        <p className={dailyProgress.colorMatched ? 'text-gray-300 line-through' : 'text-gray-100'}>Match by Colour</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className={`w-4 h-4 rounded-full ${dailyProgress.foodMatched ? 'bg-green-500' : 'bg-gray-600'}`}></div>
+                        <p className={dailyProgress.foodMatched ? 'text-gray-300 line-through' : 'text-gray-100'}>Match by Food</p>
+                    </div>
+                </div>
+                
                 <button onClick={() => { playClickSound(isMuted); setMode("selection"); }} className="w-full bg-white text-black font-semibold rounded-full p-4 hover:bg-gray-200 transition">Start Match</button>
               </div>
             ) : mode === "selection" ? (
@@ -204,18 +304,47 @@ export default function App() {
                 <div className="text-4xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-300 to-blue-300">
                     {result.characterName}
                 </div>
+                {streak > 1 && (
+                    <div className="text-sm text-pink-300 mb-4 font-bold tracking-widest">
+                        🔥 {streak} DAY STREAK
+                    </div>
+                )}
                 <div className="bg-[#1b1e27] p-6 rounded-2xl mb-8 border border-white/5">
                     <p className="font-bold mb-4 text-lg italic">"{result.quote}"</p>
                     <p className="text-gray-400">{result.description}</p>
                 </div>
-                <motion.button 
-                    onClick={handleMatchAgain}
-                    className="w-full bg-white text-black font-semibold rounded-full p-4 hover:bg-gray-200 transition"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                >
-                    Match again?
-                </motion.button>
+                <div className="flex gap-4">
+                    <motion.button 
+                        onClick={handleMatchAgain}
+                        className="flex-1 bg-white text-black font-semibold rounded-full p-4 hover:bg-gray-200 transition"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        Match again?
+                    </motion.button>
+                    <motion.button
+                        onClick={async () => {
+                            const shareData = {
+                                title: 'My Anime Character Match',
+                                text: `Hey there, I got "${result.characterName}" in this app made by Pratyush Kushagra , Anish, wanna try? Go to the link-(https://anime-kushpraj.vercel.app/)`,
+                                url: 'https://anime-kushpraj.vercel.app/',
+                            };
+                            try {
+                                if (navigator.share) {
+                                    await navigator.share(shareData);
+                                } else {
+                                    await navigator.clipboard.writeText(shareData.text);
+                                    alert('Link copied to clipboard!');
+                                }
+                            } catch (err) {
+                                console.error('Error sharing:', err);
+                            }
+                        }}
+                        className="flex-none bg-[#1b1e27] text-white p-4 rounded-full border border-white/10 hover:border-pink-300 transition"
+                    >
+                        <Share2 className="w-5 h-5" />
+                    </motion.button>
+                </div>
             </motion.div>
         )}
       </AnimatePresence>
