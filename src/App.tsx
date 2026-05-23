@@ -344,12 +344,23 @@ export default function App() {
                             };
 
                             try {
-                                // Attempt to fetch and share an image if possible
-                                const response = await fetch('https://wallpapercave.com/wp/wp5535573.jpg');
-                                const blob = await response.blob();
-                                const file = new File([blob], 'anime-match.jpg', { type: blob.type });
+                                // Robustly try one of the provided images
+                                const imageUrls = ['https://wallpapercave.com/wp/wp5535573.jpg', 'https://wallpapercave.com/wp/wp1853123.jpg'];
+                                let file: File | null = null;
+                                
+                                for (const url of imageUrls) {
+                                    try {
+                                        const response = await fetch(url);
+                                        if (!response.ok) continue;
+                                        const blob = await response.blob();
+                                        file = new File([blob], 'matched-character.jpg', { type: blob.type });
+                                        break;
+                                    } catch (err) {
+                                        console.warn(`Could not fetch image from ${url}:`, err);
+                                    }
+                                }
 
-                                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                                if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
                                     shareData.files = [file];
                                 }
                             } catch (err) {
