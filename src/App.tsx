@@ -9,6 +9,7 @@ import { Volume2, VolumeX, Music, Home, Compass, Clock, Share2, Camera } from 'l
 import confetti from 'canvas-confetti';
 import { toPng } from 'html-to-image';
 import { CHARACTER_DATA, COLOUR_CHARACTER_MAP, FOOD_CHARACTER_MAP, NAME_CHARACTER_MAP } from './data';
+import { CHARACTER_SERIES_MAP } from './series-map';
 import Slideshow from './components/Slideshow';
 import { playClickSound, playSuccessSound, toggleAmbientAudio } from './lib/audio';
 
@@ -38,6 +39,7 @@ export default function App() {
   });
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState<AnimeResult[]>([]);
+  const [selectedSeries, setSelectedSeries] = useState<string>("All");
   
   const lastResultRef = useRef<AnimeResult | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
@@ -193,13 +195,13 @@ export default function App() {
             }} />
         </div>
         <button 
-          onClick={() => setIsAmbientPlaying(!isAmbientPlaying)}
+          onClick={() => { playClickSound(isMuted); setIsAmbientPlaying(!isAmbientPlaying); }}
           className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition"
         >
           <Music className={`w-6 h-6 ${isAmbientPlaying ? 'text-pink-300' : ''}`} />
         </button>
         <button 
-          onClick={() => setIsMuted(!isMuted)}
+          onClick={() => { playClickSound(isMuted); setIsMuted(!isMuted); }}
           className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition"
         >
           {isMuted ? <VolumeX className="w-6 h-6" /> : <Volume2 className="w-6 h-6" />}
@@ -216,12 +218,17 @@ export default function App() {
                 className="w-full max-w-md bg-[#111111]/80 border border-white/10 rounded-3xl p-8 shadow-2xl backdrop-blur-md overflow-y-auto max-h-[60vh]"
             >
                 <h2 className="text-2xl font-bold mb-4">History</h2>
+                <select value={selectedSeries} onChange={(e) => setSelectedSeries(e.target.value)} className="w-full bg-[#1b1e27] text-white p-2 rounded-xl border border-white/5 mb-4">
+                    {["All", ...Array.from(new Set(history.map(h => CHARACTER_SERIES_MAP[h.characterName] || "Unknown")))].map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
                 {history.length === 0 ? <p className="text-gray-400">No matches yet!</p> : (
                     <ul className="space-y-4">
-                        {history.map((match, i) => (
+                        {history
+                         .filter(match => selectedSeries === "All" || (CHARACTER_SERIES_MAP[match.characterName] || "Unknown") === selectedSeries)
+                         .map((match, i) => (
                             <li key={i} className="bg-[#1b1e27] p-4 rounded-xl border border-white/5">
                                 <p className="font-bold">{match.characterName}</p>
-                                <p className="text-sm text-gray-400">{match.userName || 'Anonymous'}</p>
+                                <p className="text-sm text-gray-400">{match.userName || 'Anonymous'} - {CHARACTER_SERIES_MAP[match.characterName] || "Unknown"}</p>
                             </li>
                         ))}
                     </ul>
@@ -319,6 +326,7 @@ export default function App() {
                     </motion.button>
                     <motion.button
                         onClick={async () => {
+                            playClickSound(isMuted);
                             if (resultRef.current) {
                                 try {
                                     const dataUrl = await toPng(resultRef.current);
@@ -337,6 +345,7 @@ export default function App() {
                     </motion.button>
                     <motion.button
                         onClick={async () => {
+                            playClickSound(isMuted);
                             const shareData: ShareData = {
                                 title: 'My Anime Character Match',
                                 text: `Hey there, I got "${result.characterName}" in this app made by Pratyush Kushagra and Anish, wanna try? Go to the link-(https://anime-kushpraj.vercel.app/)`,

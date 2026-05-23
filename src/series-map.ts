@@ -1,0 +1,15 @@
+export const CHARACTER_SERIES_MAP: Record<string, string> = {
+  "Sukuna": "Jujutsu Kaisen",
+  "Yuji": "Jujutsu Kaisen",
+  "Gojo": "Jujutsu Kaisen",
+  "Luffy": "One Piece",
+  "Zoro": "One Piece",
+  "Naruto Uzumaki": "Naruto",
+  "Sasuke Uchiha": "Naruto",
+  "Goku": "Dragon Ball",
+  "Vegeta": "Dragon Ball",
+  "Saitama": "One Punch Man",
+  "Genos": "One Punch Man",
+  "Levi Ackerman": "Attack on Titan",
+  "Eren Yeager": "Attack on Titan",
+};
