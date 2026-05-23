@@ -337,11 +337,25 @@ export default function App() {
                     </motion.button>
                     <motion.button
                         onClick={async () => {
-                            const shareData = {
+                            const shareData: ShareData = {
                                 title: 'My Anime Character Match',
                                 text: `Hey there, I got "${result.characterName}" in this app made by Pratyush Kushagra and Anish, wanna try? Go to the link-(https://anime-kushpraj.vercel.app/)`,
                                 url: 'https://anime-kushpraj.vercel.app/',
                             };
+
+                            try {
+                                // Attempt to fetch and share an image if possible
+                                const response = await fetch('https://wallpapercave.com/wp/wp5535573.jpg');
+                                const blob = await response.blob();
+                                const file = new File([blob], 'anime-match.jpg', { type: blob.type });
+
+                                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                                    shareData.files = [file];
+                                }
+                            } catch (err) {
+                                console.warn('Could not add image to share:', err);
+                            }
+
                             try {
                                 if (navigator.share) {
                                     await navigator.share(shareData);
