@@ -5,8 +5,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Volume2, VolumeX, Music, Home, Compass, Clock, Share2 } from 'lucide-react';
+import { Volume2, VolumeX, Music, Home, Compass, Clock, Share2, Camera } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { toPng } from 'html-to-image';
 import { CHARACTER_DATA, COLOUR_CHARACTER_MAP, FOOD_CHARACTER_MAP, NAME_CHARACTER_MAP } from './data';
 import Slideshow from './components/Slideshow';
 import { playClickSound, playSuccessSound, toggleAmbientAudio } from './lib/audio';
@@ -32,15 +33,16 @@ export default function App() {
   const [confettiIntensity, setConfettiIntensity] = useState(150);
   const [currentUser, setCurrentUser] = useState<string | null>(null);
   const [dailyProgress, setDailyProgress] = useState({
-      colorMatched: false,
-      foodMatched: false
+      foodMatched: false,
+      nameMatched: false
   });
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState<AnimeResult[]>([]);
   
   const lastResultRef = useRef<AnimeResult | null>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
 
-  const updateQuest = (type: 'colorMatched' | 'foodMatched') => {
+  const updateQuest = (type: 'foodMatched' | 'nameMatched') => {
       setDailyProgress(prev => {
           const newProgress = { ...prev, [type]: true };
           localStorage.setItem('dailyProgress', JSON.stringify(newProgress));
@@ -51,6 +53,7 @@ export default function App() {
   const handleMatchAgain = () => {
     playClickSound(isMuted);
     playSuccessSound(isMuted);
+    if ('vibrate' in navigator) navigator.vibrate(200);
     setIsFlipped(true);
     setTimeout(() => {
         lastResultRef.current = null;
@@ -80,7 +83,7 @@ export default function App() {
     const today = new Date().toDateString();
 
     if (lastDate !== today) {
-        const newProgress = { colorMatched: false, foodMatched: false };
+        const newProgress = { foodMatched: false, nameMatched: false };
         setDailyProgress(newProgress);
         localStorage.setItem('dailyProgress', JSON.stringify(newProgress));
         localStorage.setItem('lastQuestDate', today);
@@ -143,6 +146,7 @@ export default function App() {
     e.preventDefault();
     playClickSound(isMuted);
     playSuccessSound(isMuted);
+    if ('vibrate' in navigator) navigator.vibrate(200);
     const rawName = name.trim();
     if (rawName === "") return;
     const cleanFullName = rawName.toLowerCase();
@@ -159,6 +163,7 @@ export default function App() {
     }
     
     const charInfo = CHARACTER_DATA[chosenCharacter];
+    updateQuest('nameMatched');
     setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, userName: name });
   };
 
@@ -169,16 +174,6 @@ export default function App() {
     const chosenCharacter = FOOD_CHARACTER_MAP[food.toLowerCase()] || randomPool[0];
     const charInfo = CHARACTER_DATA[chosenCharacter];
     updateQuest('foodMatched');
-    setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, userName: name });
-  };
-
-  const matchByColour = (e: React.FormEvent) => {
-    e.preventDefault();
-    playClickSound(isMuted);
-    playSuccessSound(isMuted);
-    const chosenCharacter = COLOUR_CHARACTER_MAP[colour.toLowerCase()] || randomPool[0];
-    const charInfo = CHARACTER_DATA[chosenCharacter];
-    updateQuest('colorMatched');
     setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, userName: name });
   };
 
@@ -248,12 +243,12 @@ export default function App() {
                 <div className="bg-[#1b1e27] rounded-3xl p-6 border border-white/5 text-left space-y-3">
                     <h3 className="font-bold text-pink-300">Daily Quests</h3>
                     <div className="flex items-center gap-2">
-                        <div className={`w-4 h-4 rounded-full ${dailyProgress.colorMatched ? 'bg-green-500' : 'bg-gray-600'}`}></div>
-                        <p className={dailyProgress.colorMatched ? 'text-gray-300 line-through' : 'text-gray-100'}>Match by Colour</p>
-                    </div>
-                    <div className="flex items-center gap-2">
                         <div className={`w-4 h-4 rounded-full ${dailyProgress.foodMatched ? 'bg-green-500' : 'bg-gray-600'}`}></div>
                         <p className={dailyProgress.foodMatched ? 'text-gray-300 line-through' : 'text-gray-100'}>Match by Food</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className={`w-4 h-4 rounded-full ${dailyProgress.nameMatched ? 'bg-green-500' : 'bg-gray-600'}`}></div>
+                        <p className={dailyProgress.nameMatched ? 'text-gray-300 line-through' : 'text-gray-100'}>Match by Name</p>
                     </div>
                 </div>
                 
@@ -261,17 +256,16 @@ export default function App() {
               </div>
             ) : mode === "selection" ? (
               <div className="flex flex-col gap-4">
-                <button onClick={() => { playClickSound(isMuted); setMode("colour"); }} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-full p-4 hover:border-red-500 transition">Match by Colour</button>
                 <button onClick={() => { playClickSound(isMuted); setMode("food"); }} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-full p-4 hover:border-red-500 transition">Match by Food</button>
                 <button onClick={() => { playClickSound(isMuted); setMode("name"); }} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-full p-4 hover:border-red-500 transition">Match by Name</button>
               </div>
             ) : (
-                <form onSubmit={mode === "name" ? revealSoul : mode === "colour" ? matchByColour : matchByFood} className="flex flex-col gap-6">
+                <form onSubmit={mode === "name" ? revealSoul : matchByFood} className="flex flex-col gap-6">
                     <p className="text-sm text-gray-400">Enter your details for your anime match!</p>
                     <input 
                       type="text" 
-                      value={mode === "name" ? name : mode === "colour" ? colour : food} 
-                      onChange={(e) => mode === "name" ? setName(e.target.value) : mode === "colour" ? setColour(e.target.value) : setFood(e.target.value)} 
+                      value={mode === "name" ? name : food} 
+                      onChange={(e) => mode === "name" ? setName(e.target.value) : setFood(e.target.value)} 
                       onKeyDown={(e) => {
                          if (e.key === 'Enter') {
                             playClickSound(isMuted);
@@ -295,6 +289,7 @@ export default function App() {
           </motion.div>
         ) : (
             <motion.div 
+                ref={resultRef}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1, rotateY: isFlipped ? 180 : 0 }}
                 transition={{ duration: 0.6 }}
@@ -324,9 +319,27 @@ export default function App() {
                     </motion.button>
                     <motion.button
                         onClick={async () => {
+                            if (resultRef.current) {
+                                try {
+                                    const dataUrl = await toPng(resultRef.current);
+                                    const link = document.createElement('a');
+                                    link.download = 'my-anime-match.png';
+                                    link.href = dataUrl;
+                                    link.click();
+                                } catch (err) {
+                                    console.error('Error saving image:', err);
+                                }
+                            }
+                        }}
+                        className="flex-none bg-[#1b1e27] text-white p-4 rounded-full border border-white/10 hover:border-pink-300 transition"
+                    >
+                        <Camera className="w-5 h-5" />
+                    </motion.button>
+                    <motion.button
+                        onClick={async () => {
                             const shareData = {
                                 title: 'My Anime Character Match',
-                                text: `Hey there, I got "${result.characterName}" in this app made by Pratyush Kushagra , Anish, wanna try? Go to the link-(https://anime-kushpraj.vercel.app/)`,
+                                text: `Hey there, I got "${result.characterName}" in this app made by Pratyush Kushagra and Anish, wanna try? Go to the link-(https://anime-kushpraj.vercel.app/)`,
                                 url: 'https://anime-kushpraj.vercel.app/',
                             };
                             try {
@@ -355,7 +368,7 @@ export default function App() {
           textShadow: '0 0 5px #fff, 0 0 10px #fff, 0 0 20px #e63946, 0 0 30px #e63946'
         }}
       >
-        Made by <a href="https://github.com/kushpraj" target="_blank" rel="noopener noreferrer" className="hover:text-pink-300 transition">Kushpraj & Team</a>
+        Made by <a href="https://github.com/kushpraj" target="_blank" rel="noopener noreferrer" className="hover:text-pink-300 transition">Pratyush,Kushagra& Anish</a>
       </div>
 
       <nav className="fixed bottom-0 left-0 w-full bg-black/80 backdrop-blur-md border-t border-white/10 flex justify-around p-4 z-50">

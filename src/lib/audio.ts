@@ -39,14 +39,25 @@ export const playSuccessSound = (muted: boolean) => {
     osc.connect(gainNode);
     gainNode.connect(ctx.destination);
     
+    // Patterns: [startFreq, endFreq, rampTime, totalDuration]
+    const patterns = [
+        [440, 880, 0.2, 0.3],    // A4 -> A5 (original)
+        [523.25, 1046.5, 0.2, 0.3], // C5 -> C6
+        [783.99, 391.99, 0.2, 0.3], // G5 -> G4 (descending)
+        [329.63, 659.25, 0.15, 0.25], // E4 -> E5
+    ];
+    
+    const [startF, endF, ramp, duration] = patterns[Math.floor(Math.random() * patterns.length)];
+
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(440, ctx.currentTime); // A4
-    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.2); // Up to A5
+    osc.frequency.setValueAtTime(startF, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(endF, ctx.currentTime + ramp);
+    
     gainNode.gain.setValueAtTime(0.05, ctx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
     
     osc.start();
-    osc.stop(ctx.currentTime + 0.3);
+    osc.stop(ctx.currentTime + duration);
 };
 
 export const toggleAmbientAudio = (playing: boolean) => {
