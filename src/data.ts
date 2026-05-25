@@ -400,3 +400,39 @@ export const NAME_CHARACTER_MAP: Record<string, string> = {
   "sneha": "Hinata Hyuga",
   "tanvi": "Mitsuri Kanroji"
 };
+
+export const TRAITS_MAP: Record<string, { strength: number; intelligence: number; kindness: number; power: number; speed: number }> = {
+  "Naruto Uzumaki": { strength: 95, intelligence: 70, kindness: 90, power: 95, speed: 85 },
+  "Sasuke Uchiha": { strength: 90, intelligence: 90, kindness: 60, power: 95, speed: 90 },
+  "Monkey D. Luffy": { strength: 95, intelligence: 60, kindness: 95, power: 90, speed: 90 },
+  "Ichigo Kurosaki": { strength: 90, intelligence: 75, kindness: 85, power: 90, speed: 95 },
+  "Levi Ackerman": { strength: 95, intelligence: 85, kindness: 70, power: 85, speed: 100 },
+  "Nezuko Kamado": { strength: 80, intelligence: 60, kindness: 100, power: 85, speed: 80 },
+  "Goku": { strength: 100, intelligence: 65, kindness: 95, power: 100, speed: 95 },
+  "Roronoa Zoro": { strength: 95, intelligence: 70, kindness: 80, power: 90, speed: 85 },
+  "Light Yagami": { strength: 40, intelligence: 100, kindness: 20, power: 50, speed: 60 },
+  "Tanjiro Kamado": { strength: 85, intelligence: 75, kindness: 100, power: 85, speed: 80 },
+  "Shikamaru Nara": { strength: 60, intelligence: 100, kindness: 75, power: 65, speed: 70 },
+  "Ash Ketchum": { strength: 50, intelligence: 70, kindness: 95, power: 60, speed: 60 },
+  "Edward Elric": { strength: 75, intelligence: 90, kindness: 80, power: 80, speed: 75 },
+  "Usagi Tsukino (Sailor Moon)": { strength: 70, intelligence: 60, kindness: 95, power: 85, speed: 70 },
+  "Hinata Hyuga": { strength: 70, intelligence: 75, kindness: 100, power: 75, speed: 75 },
+  "Natsu Dragneel": { strength: 90, intelligence: 60, kindness: 90, power: 90, speed: 80 },
+  "Ryuk": { strength: 70, intelligence: 90, kindness: 30, power: 80, speed: 80 },
+  "Katsuki Bakugo": { strength: 90, intelligence: 80, kindness: 50, power: 90, speed: 90 },
+  "Ochaco Uraraka": { strength: 70, intelligence: 75, kindness: 95, power: 75, speed: 70 },
+  "Shoto Todoroki": { strength: 85, intelligence: 85, kindness: 80, power: 90, speed: 80 },
+  "Killua Zoldyck": { strength: 85, intelligence: 90, kindness: 75, power: 85, speed: 95 },
+  "Mikasa Ackerman": { strength: 90, intelligence: 75, kindness: 70, power: 80, speed: 95 },
+  "Vash the Stampede": { strength: 80, intelligence: 80, kindness: 100, power: 85, speed: 90 },
+  "Sanji": { strength: 85, intelligence: 75, kindness: 90, power: 85, speed: 90 },
+  "Byakuya Kuchiki": { strength: 85, intelligence: 90, kindness: 60, power: 85, speed: 90 },
+  "Eren Yeager": { strength: 80, intelligence: 70, kindness: 50, power: 90, speed: 75 },
+  "Gon Freecss": { strength: 90, intelligence: 60, kindness: 95, power: 90, speed: 85 },
+  "Yusuke Urameshi": { strength: 90, intelligence: 55, kindness: 85, power: 85, speed: 80 },
+  "Rukia Kuchiki": { strength: 80, intelligence: 85, kindness: 85, power: 80, speed: 85 },
+  "Sakura Haruno": { strength: 85, intelligence: 90, kindness: 80, power: 80, speed: 75 },
+  "Zenitsu Agatsuma": { strength: 70, intelligence: 60, kindness: 85, power: 75, speed: 100 },
+  "Itachi Uchiha": { strength: 85, intelligence: 100, kindness: 80, power: 95, speed: 95 }
+};
+

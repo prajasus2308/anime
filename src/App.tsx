@@ -8,8 +8,10 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Volume2, VolumeX, Music, Home, Compass, Clock, Share2, Camera } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { toPng } from 'html-to-image';
-import { CHARACTER_DATA, COLOUR_CHARACTER_MAP, FOOD_CHARACTER_MAP, NAME_CHARACTER_MAP } from './data';
+import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import { CHARACTER_SERIES_MAP } from './series-map';
+import { TRIVIA_DATA, TriviaQuestion } from './trivia';
+import { CHARACTER_DATA, FOOD_CHARACTER_MAP, NAME_CHARACTER_MAP, TRAITS_MAP } from './data';
 import Slideshow from './components/Slideshow';
 import { playClickSound, playSuccessSound, toggleAmbientAudio } from './lib/audio';
 
@@ -41,6 +43,12 @@ export default function App() {
   const [history, setHistory] = useState<AnimeResult[]>([]);
   const [selectedSeries, setSelectedSeries] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedMatches, setSelectedMatches] = useState<AnimeResult[]>([]);
+  const [isComparing, setIsComparing] = useState(false);
+  const [trivia, setTrivia] = useState<TriviaQuestion | null>(null);
+  const [triviaAnswer, setTriviaAnswer] = useState<string | null>(null);
+  const [triviaStreak, setTriviaStreak] = useState(0);
+  const [triviaResult, setTriviaResult] = useState<'correct' | 'incorrect' | null>(null);
   
   const lastResultRef = useRef<AnimeResult | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
@@ -82,6 +90,9 @@ export default function App() {
     }
     const savedStreak = localStorage.getItem('animeStreak');
     if (savedStreak) setStreak(parseInt(savedStreak));
+
+    const savedTriviaStreak = localStorage.getItem('triviaStreak');
+    if (savedTriviaStreak) setTriviaStreak(parseInt(savedTriviaStreak));
 
     const savedIntensity = localStorage.getItem('confettiIntensity');
     if (savedIntensity) setConfettiIntensity(parseInt(savedIntensity));
@@ -177,8 +188,12 @@ export default function App() {
     if (!charInfo) {
         console.warn(`Character ${chosenCharacter} not found in CHARACTER_DATA`);
         const fallback = randomPool[0];
-        const fallbackInfo = CHARACTER_DATA[fallback];
-        setResult({ characterName: fallbackInfo.name, quote: fallbackInfo.quote, description: fallbackInfo.description, userName: name });
+        const fallbackInfo = fallback ? CHARACTER_DATA[fallback] : null;
+        if (fallbackInfo) {
+           setResult({ characterName: fallbackInfo.name, quote: fallbackInfo.quote, description: fallbackInfo.description, userName: name });
+        } else {
+           setResult({ characterName: "Unknown", quote: "...", description: "...", userName: name });
+        }
         return;
     }
     updateQuest('nameMatched');
@@ -194,8 +209,12 @@ export default function App() {
     if (!charInfo) {
         console.warn(`Character ${chosenCharacter} not found in CHARACTER_DATA`);
         const fallback = randomPool[0];
-        const fallbackInfo = CHARACTER_DATA[fallback];
-        setResult({ characterName: fallbackInfo.name, quote: fallbackInfo.quote, description: fallbackInfo.description, userName: name });
+        const fallbackInfo = fallback ? CHARACTER_DATA[fallback] : null;
+        if (fallbackInfo) {
+           setResult({ characterName: fallbackInfo.name, quote: fallbackInfo.quote, description: fallbackInfo.description, userName: name });
+        } else {
+           setResult({ characterName: "Unknown", quote: "...", description: "...", userName: name });
+        }
         return;
     }
     updateQuest('foodMatched');
@@ -240,24 +259,109 @@ export default function App() {
                 exit={{ opacity: 0, y: -20 }}
                 className="w-full max-w-md bg-[#111111]/80 border border-white/10 rounded-3xl p-8 shadow-2xl backdrop-blur-md overflow-y-auto max-h-[60vh]"
             >
-                <h2 className="text-2xl font-bold mb-4">History</h2>
+                <div className="bg-[#1b1e27] rounded-3xl p-6 border border-white/5 text-left space-y-3">
+                    <div className="flex justify-between items-center">
+                        <h3 className="font-bold text-pink-300">Daily Anime Trivia</h3>
+                        <span className="text-sm bg-pink-500 text-white px-2 rounded-full">Streak: {triviaStreak}</span>
+                    </div>
+                    {!trivia ? (
+                        <button onClick={() => { playClickSound(isMuted); setTrivia(TRIVIA_DATA[Math.floor(Math.random() * TRIVIA_DATA.length)]); }} className="w-full bg-pink-600 text-white p-2 rounded-xl text-sm">Get Question</button>
+                    ) : (
+                        <div className="space-y-4">
+                            <p className="text-sm">{trivia.question}</p>
+                            <div className="grid grid-cols-2 gap-2">
+                                {trivia.options.map(opt => (
+                                    <button 
+                                        key={opt}
+                                        onClick={() => {
+                                            playClickSound(isMuted);
+                                            if (opt === trivia.answer) {
+                                                setTriviaResult('correct');
+                                                setTriviaStreak(s => { const ns = s + 1; localStorage.setItem('triviaStreak', ns.toString()); return ns; });
+                                            } else {
+                                                setTriviaResult('incorrect');
+                                                setTriviaStreak(0);
+                                                localStorage.setItem('triviaStreak', '0');
+                                            }
+                                            setTimeout(() => { setTrivia(null); setTriviaResult(null); }, 1500);
+                                        }}
+                                        className={`p-2 rounded-xl text-sm border border-white/5 ${triviaResult ? (opt === trivia.answer ? 'bg-green-600' : 'bg-red-600') : 'bg-black/20'}`}
+                                        disabled={!!triviaResult}
+                                    >
+                                        {opt}
+                                    </button>
+                                ))}
+                            </div>
+                            {triviaResult && (
+                                <p className={`text-center font-bold ${triviaResult === 'correct' ? 'text-green-400' : 'text-red-400'}`}>
+                                    {triviaResult === 'correct' ? 'Correct!' : 'Incorrect!'}
+                                </p>
+                            )}
+                        </div>
+                    )}
+                </div>
+                <div className="flex justify-between items-center mb-4 p-4 bg-[#1b1e27] rounded-xl border border-white/5">
+                    <h2 className="text-2xl font-bold">History</h2>
+                    <div className={`px-3 py-1 rounded-full text-sm font-bold ${(() => {
+                        const uniqueCount = new Set(history.map(h => h.characterName)).size;
+                        if (uniqueCount >= 20) return "text-red-500";
+                        if (uniqueCount >= 10) return "text-purple-500";
+                        if (uniqueCount >= 5) return "text-blue-500";
+                        return "text-gray-500";
+                    })()} bg-black/50`}>
+                        {(() => {
+                            const uniqueCount = new Set(history.map(h => h.characterName)).size;
+                            if (uniqueCount >= 20) return "Master";
+                            if (uniqueCount >= 10) return "Expert";
+                            if (uniqueCount >= 5) return "Collector";
+                            return "Novice";
+                        })()} ({new Set(history.map(h => h.characterName)).size})
+                    </div>
+                </div>
                 <div className="flex flex-col gap-2 mb-4">
                     <select value={selectedSeries} onChange={(e) => setSelectedSeries(e.target.value)} className="w-full bg-[#1b1e27] text-white p-2 rounded-xl border border-white/5">
                         {["All", ...Array.from(new Set(history.map(h => CHARACTER_SERIES_MAP[h.characterName] || "Unknown")))].map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
                     <input type="text" placeholder="Search by character name..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-[#1b1e27] text-white p-2 rounded-xl border border-white/5" />
+                    {selectedMatches.length === 2 && (
+                        <button onClick={() => setIsComparing(true)} className="w-full bg-pink-600 text-white p-2 rounded-xl border border-white/5">Compare Selected</button>
+                    )}
                 </div>
                 {history.length === 0 ? <p className="text-gray-400">No matches yet!</p> : (
                     <ul className="space-y-4">
                         {history
                          .filter(match => (selectedSeries === "All" || (CHARACTER_SERIES_MAP[match.characterName] || "Unknown") === selectedSeries) && match.characterName.toLowerCase().includes(searchQuery.toLowerCase()))
                          .map((match, i) => (
-                            <li key={i} className="bg-[#1b1e27] p-4 rounded-xl border border-white/5">
-                                <p className="font-bold">{match.characterName}</p>
-                                <p className="text-sm text-gray-400">{match.userName || 'Anonymous'} - {CHARACTER_SERIES_MAP[match.characterName] || "Unknown"}</p>
+                            <li key={i} className={`bg-[#1b1e27] p-4 rounded-xl border ${selectedMatches.includes(match) ? 'border-pink-500' : 'border-white/5'} cursor-pointer flex items-center justify-between`} onClick={() => {
+                                if (selectedMatches.includes(match)) {
+                                    setSelectedMatches(selectedMatches.filter(m => m !== match));
+                                } else if (selectedMatches.length < 2) {
+                                    setSelectedMatches([...selectedMatches, match]);
+                                }
+                            }}>
+                                <div>
+                                    <p className="font-bold">{match.characterName}</p>
+                                    <p className="text-sm text-gray-400">{match.userName || 'Anonymous'} - {CHARACTER_SERIES_MAP[match.characterName] || "Unknown"}</p>
+                                </div>
+                                {selectedMatches.includes(match) && <div className="w-4 h-4 bg-pink-500 rounded-full" />}
                             </li>
                         ))}
                     </ul>
+                )}
+                {isComparing && selectedMatches.length === 2 && (
+                    <div className="fixed inset-0 bg-black/90 z-[60] flex flex-col p-6 overflow-y-auto">
+                        <h2 className="text-2xl font-bold mb-6 text-center">Comparison</h2>
+                        <div className="grid grid-cols-2 gap-4">
+                            {selectedMatches.map((match, i) => (
+                                <div key={i} className="bg-[#1b1e27] p-4 rounded-xl border border-white/5">
+                                    <p className="font-bold text-center mb-2 text-pink-300 text-xl">{match.characterName}</p>
+                                    <p className="text-sm italic mb-4">"{match.quote}"</p>
+                                    <p className="text-xs text-gray-400">{match.description}</p>
+                                </div>
+                            ))}
+                        </div>
+                        <button onClick={() => { setIsComparing(false); setSelectedMatches([]); }} className="mt-8 bg-white text-black font-semibold rounded-full p-4 hover:bg-gray-200 transition">Close</button>
+                    </div>
                 )}
             </motion.div>
         ) : !result ? (
@@ -284,6 +388,7 @@ export default function App() {
                         <p className={dailyProgress.nameMatched ? 'text-gray-300 line-through' : 'text-gray-100'}>Match by Name</p>
                     </div>
                 </div>
+
                 
                 <button onClick={() => { playClickSound(isMuted); setMode("selection"); }} className="w-full bg-white text-black font-semibold rounded-full p-4 hover:bg-gray-200 transition">Start Match</button>
               </div>
@@ -323,9 +428,9 @@ export default function App() {
         ) : (
             <motion.div 
                 ref={resultRef}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1, rotateY: isFlipped ? 180 : 0 }}
-                transition={{ duration: 0.6 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0, rotateY: isFlipped ? 180 : 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
                 className="w-full max-w-md bg-[#111111]/80 border border-white/10 rounded-3xl p-8 text-center shadow-2xl backdrop-blur-md"
             >
                 <div className="text-xs uppercase tracking-widest text-gray-400 mb-3">Your Character Match</div>
@@ -341,6 +446,24 @@ export default function App() {
                     <p className="font-bold mb-4 text-lg italic">"{result.quote}"</p>
                     <p className="text-gray-400">{result.description}</p>
                 </div>
+                {TRAITS_MAP[result.characterName] && (
+                    <div className="h-64 mb-8">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={[
+                                { trait: 'Strength', value: TRAITS_MAP[result.characterName].strength },
+                                { trait: 'Intelligence', value: TRAITS_MAP[result.characterName].intelligence },
+                                { trait: 'Kindness', value: TRAITS_MAP[result.characterName].kindness },
+                                { trait: 'Power', value: TRAITS_MAP[result.characterName].power },
+                                { trait: 'Speed', value: TRAITS_MAP[result.characterName].speed },
+                            ]}>
+                                <PolarGrid stroke="#4a5568" />
+                                <PolarAngleAxis dataKey="trait" tick={{ fill: '#e2e8f0', fontSize: 12 }} />
+                                <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+                                <Radar name="Traits" dataKey="value" stroke="#f472b6" fill="#f472b6" fillOpacity={0.6} />
+                            </RadarChart>
+                        </ResponsiveContainer>
+                    </div>
+                )}
                 <div className="flex gap-4">
                     <motion.button 
                         onClick={handleMatchAgain}
@@ -443,6 +566,10 @@ export default function App() {
         <button onClick={() => { playClickSound(isMuted); setShowHistory(true); }} className={`flex flex-col items-center ${showHistory ? 'text-pink-300' : 'text-gray-400'}`}>
             <Clock className="w-6 h-6" />
             <span className="text-xs">History</span>
+        </button>
+        <button onClick={() => { playClickSound(isMuted); setTrivia(TRIVIA_DATA[Math.floor(Math.random() * TRIVIA_DATA.length)]); }} className={`flex flex-col items-center ${trivia ? 'text-pink-300' : 'text-gray-400'}`}>
+            <Compass className="w-6 h-6" />
+            <span className="text-xs">Trivia</span>
         </button>
       </nav>
     </div>
