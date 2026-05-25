@@ -40,6 +40,7 @@ export default function App() {
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState<AnimeResult[]>([]);
   const [selectedSeries, setSelectedSeries] = useState<string>("All");
+  const [searchQuery, setSearchQuery] = useState("");
   
   const lastResultRef = useRef<AnimeResult | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
@@ -52,17 +53,25 @@ export default function App() {
       });
   };
 
-  const handleMatchAgain = () => {
-    playClickSound(isMuted);
-    playSuccessSound(isMuted);
-    if ('vibrate' in navigator) navigator.vibrate(200);
-    setIsFlipped(true);
-    setTimeout(() => {
+  const resetState = () => {
+        setName('');
+        setColour('');
+        setFood('');
+        setResult(null);
         lastResultRef.current = null;
-        setResult(null); setName(''); setColour(''); setFood(''); setMode("selection");
-        setIsFlipped(false);
-    }, 600);
-  };
+    };
+
+    const handleMatchAgain = () => {
+        playClickSound(isMuted);
+        playSuccessSound(isMuted);
+        if ('vibrate' in navigator) navigator.vibrate(200);
+        setIsFlipped(true);
+        setTimeout(() => {
+            resetState();
+            setMode("selection");
+            setIsFlipped(false);
+        }, 600);
+    };
 
   const randomPool = Object.keys(CHARACTER_DATA);
 
@@ -165,6 +174,13 @@ export default function App() {
     }
     
     const charInfo = CHARACTER_DATA[chosenCharacter];
+    if (!charInfo) {
+        console.warn(`Character ${chosenCharacter} not found in CHARACTER_DATA`);
+        const fallback = randomPool[0];
+        const fallbackInfo = CHARACTER_DATA[fallback];
+        setResult({ characterName: fallbackInfo.name, quote: fallbackInfo.quote, description: fallbackInfo.description, userName: name });
+        return;
+    }
     updateQuest('nameMatched');
     setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, userName: name });
   };
@@ -173,8 +189,15 @@ export default function App() {
     e.preventDefault();
     playClickSound(isMuted);
     playSuccessSound(isMuted);
-    const chosenCharacter = FOOD_CHARACTER_MAP[food.toLowerCase()] || randomPool[0];
+    let chosenCharacter = FOOD_CHARACTER_MAP[food.toLowerCase()] || randomPool[0];
     const charInfo = CHARACTER_DATA[chosenCharacter];
+    if (!charInfo) {
+        console.warn(`Character ${chosenCharacter} not found in CHARACTER_DATA`);
+        const fallback = randomPool[0];
+        const fallbackInfo = CHARACTER_DATA[fallback];
+        setResult({ characterName: fallbackInfo.name, quote: fallbackInfo.quote, description: fallbackInfo.description, userName: name });
+        return;
+    }
     updateQuest('foodMatched');
     setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, userName: name });
   };
@@ -218,13 +241,16 @@ export default function App() {
                 className="w-full max-w-md bg-[#111111]/80 border border-white/10 rounded-3xl p-8 shadow-2xl backdrop-blur-md overflow-y-auto max-h-[60vh]"
             >
                 <h2 className="text-2xl font-bold mb-4">History</h2>
-                <select value={selectedSeries} onChange={(e) => setSelectedSeries(e.target.value)} className="w-full bg-[#1b1e27] text-white p-2 rounded-xl border border-white/5 mb-4">
-                    {["All", ...Array.from(new Set(history.map(h => CHARACTER_SERIES_MAP[h.characterName] || "Unknown")))].map(s => <option key={s} value={s}>{s}</option>)}
-                </select>
+                <div className="flex flex-col gap-2 mb-4">
+                    <select value={selectedSeries} onChange={(e) => setSelectedSeries(e.target.value)} className="w-full bg-[#1b1e27] text-white p-2 rounded-xl border border-white/5">
+                        {["All", ...Array.from(new Set(history.map(h => CHARACTER_SERIES_MAP[h.characterName] || "Unknown")))].map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                    <input type="text" placeholder="Search by character name..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-[#1b1e27] text-white p-2 rounded-xl border border-white/5" />
+                </div>
                 {history.length === 0 ? <p className="text-gray-400">No matches yet!</p> : (
                     <ul className="space-y-4">
                         {history
-                         .filter(match => selectedSeries === "All" || (CHARACTER_SERIES_MAP[match.characterName] || "Unknown") === selectedSeries)
+                         .filter(match => (selectedSeries === "All" || (CHARACTER_SERIES_MAP[match.characterName] || "Unknown") === selectedSeries) && match.characterName.toLowerCase().includes(searchQuery.toLowerCase()))
                          .map((match, i) => (
                             <li key={i} className="bg-[#1b1e27] p-4 rounded-xl border border-white/5">
                                 <p className="font-bold">{match.characterName}</p>
@@ -290,7 +316,7 @@ export default function App() {
                     >
                       Find Match
                     </motion.button>
-                    <button type="button" onClick={() => { playClickSound(isMuted); setMode("selection"); }} className="text-sm text-gray-500 underline">Back</button>
+                    <button type="button" onClick={() => { playClickSound(isMuted); resetState(); setMode("selection"); }} className="text-sm text-gray-500 underline">Back</button>
                 </form>
             )}
           </motion.div>
@@ -406,7 +432,7 @@ export default function App() {
       </div>
 
       <nav className="fixed bottom-0 left-0 w-full bg-black/80 backdrop-blur-md border-t border-white/10 flex justify-around p-4 z-50">
-        <button onClick={() => { playClickSound(isMuted); setMode("landing"); setShowHistory(false); }} className={`flex flex-col items-center ${mode === 'landing' ? 'text-pink-300' : 'text-gray-400'}`}>
+        <button onClick={() => { playClickSound(isMuted); resetState(); setMode("landing"); setShowHistory(false); }} className={`flex flex-col items-center ${mode === 'landing' ? 'text-pink-300' : 'text-gray-400'}`}>
             <Home className="w-6 h-6" />
             <span className="text-xs">Home</span>
         </button>
