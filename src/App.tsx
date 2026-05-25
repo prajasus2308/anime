@@ -11,6 +11,7 @@ import { toPng } from 'html-to-image';
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import { CHARACTER_SERIES_MAP } from './series-map';
 import { CHARACTER_DATA, FOOD_CHARACTER_MAP, NAME_CHARACTER_MAP, TRAITS_MAP } from './data';
+import { QUIZ_QUESTIONS } from './quiz-data';
 import Slideshow from './components/Slideshow';
 import { playClickSound, playSuccessSound, toggleAmbientAudio } from './lib/audio';
 
@@ -25,7 +26,7 @@ export default function App() {
   const [name, setName] = useState('');
   const [result, setResult] = useState<AnimeResult | null>(null);
   
-  const [mode, setMode] = useState<"landing" | "selection" | "colour" | "food" | "name">("landing");
+  const [mode, setMode] = useState<"landing" | "selection" | "colour" | "food" | "name" | "quiz">("landing");
   const [colour, setColour] = useState('');
   const [food, setFood] = useState('');
   const [isMuted, setIsMuted] = useState(false);
@@ -44,6 +45,8 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMatches, setSelectedMatches] = useState<AnimeResult[]>([]);
   const [isComparing, setIsComparing] = useState(false);
+  const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
+  const [quizScores, setQuizScores] = useState<Record<string, number>>({});
   
   const lastResultRef = useRef<AnimeResult | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
@@ -347,7 +350,37 @@ export default function App() {
               <div className="flex flex-col gap-4">
                 <button onClick={() => { playClickSound(isMuted); setMode("food"); }} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-full p-4 hover:border-red-500 transition">Match by Food</button>
                 <button onClick={() => { playClickSound(isMuted); setMode("name"); }} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-full p-4 hover:border-red-500 transition">Match by Name</button>
+                <button onClick={() => { playClickSound(isMuted); setMode("quiz"); setCurrentQuizIndex(0); setQuizScores({}); }} className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-full p-4 hover:border-red-500 transition">Match by Quiz</button>
               </div>
+            ) : mode === "quiz" ? (
+                <div className="space-y-6">
+                    <p className="text-xl font-bold">{QUIZ_QUESTIONS[currentQuizIndex].question}</p>
+                    <div className="grid grid-cols-1 gap-4">
+                        {QUIZ_QUESTIONS[currentQuizIndex].options.map((option, i) => (
+                            <button 
+                                key={i}
+                                onClick={() => {
+                                    playClickSound(isMuted);
+                                    setQuizScores(prev => {
+                                        const newScores = { ...prev, [option.character]: (prev[option.character] || 0) + 1 };
+                                        if (currentQuizIndex < QUIZ_QUESTIONS.length - 1) {
+                                            setCurrentQuizIndex(currentQuizIndex + 1);
+                                        } else {
+                                            const bestCharacter = Object.entries(newScores).reduce((a, b) => b[1] > a[1] ? b : a, ["Naruto Uzumaki", 0])[0];
+                                            const charInfo = CHARACTER_DATA[bestCharacter] || CHARACTER_DATA["Naruto Uzumaki"];
+                                            setResult({ characterName: charInfo.name, quote: charInfo.quote, description: charInfo.description, userName: name });
+                                            setMode("selection");
+                                        }
+                                        return newScores;
+                                    });
+                                }}
+                                className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-full p-4 hover:border-red-500 transition text-left"
+                            >
+                                {option.text}
+                            </button>
+                        ))}
+                    </div>
+                </div>
             ) : (
                 <form onSubmit={mode === "name" ? revealSoul : matchByFood} className="flex flex-col gap-6">
                     <p className="text-sm text-gray-400">Enter your details for your anime match!</p>
