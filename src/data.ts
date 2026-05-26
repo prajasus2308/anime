@@ -295,7 +295,12 @@ export const FOOD_CHARACTER_MAP: Record<string, string> = {
   "bhel puri": "Roronoa Zoro",
   "dosa": "Itachi Uchiha",
   "idli": "Sasuke Uchiha",
-  "pakora": "Zenitsu Agatsuma"
+  "pakora": "Zenitsu Agatsuma",
+  "paratha": "Kakashi Hatake",
+  "pani puri": "Killua Zoldyck",
+  "chaas": "Boruto Uzumaki",
+  "poha": "Mikasa Ackerman",
+  "upma": "Armin Arlert"
 };
 
 
@@ -435,4 +440,22 @@ export const TRAITS_MAP: Record<string, { strength: number; intelligence: number
   "Zenitsu Agatsuma": { strength: 70, intelligence: 60, kindness: 85, power: 75, speed: 100 },
   "Itachi Uchiha": { strength: 85, intelligence: 100, kindness: 80, power: 95, speed: 95 }
 };
+
+export const CHARACTER_COLORS: Record<string, string[]> = {
+  "Naruto Uzumaki": ["#ffca3a", "#ff5733"],
+  "Sasuke Uchiha": ["#8e44ad", "#1c1c1c"],
+  "Monkey D. Luffy": ["#ff0000", "#ffca3a"],
+  "Eren Yeager": ["#6e7f80", "#2c3e50"],
+  "Gojo": ["#4d96ff", "#ffffff"],
+  "Saitama": ["#ffff00", "#ff0000"],
+  "Tanjiro Kamado": ["#5d4037", "#f44336"],
+  "Goku": ["#ff5733", "#ffc107"],
+  "Ichigo Kurosaki": ["#ff8c00", "#8b4513"],
+  "Levi Ackerman": ["#7f8c8d", "#2c3e50"],
+  "Killua Zoldyck": ["#3498db", "#ffffff"],
+  "Gon Freecss": ["#27ae60", "#f1c40f"]
+};
+
+export const DEFAULT_COLORS = ["#f472b6", "#a78bfa", "#60a5fa"];
+
 

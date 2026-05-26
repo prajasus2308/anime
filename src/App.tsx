@@ -10,10 +10,12 @@ import confetti from 'canvas-confetti';
 import { toPng } from 'html-to-image';
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import { CHARACTER_SERIES_MAP } from './series-map';
-import { CHARACTER_DATA, FOOD_CHARACTER_MAP, NAME_CHARACTER_MAP, TRAITS_MAP } from './data';
+import { CHARACTER_DATA, FOOD_CHARACTER_MAP, NAME_CHARACTER_MAP, TRAITS_MAP, CHARACTER_COLORS, DEFAULT_COLORS } from './data';
 import { QUIZ_QUESTIONS } from './quiz-data';
 import Slideshow from './components/Slideshow';
 import { playClickSound, playSuccessSound, toggleAmbientAudio } from './lib/audio';
+import RadarChartComponent from './components/RadarChartComponent';
+import ShareModal from './components/ShareModal';
 
 interface AnimeResult {
   characterName: string;
@@ -45,6 +47,7 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMatches, setSelectedMatches] = useState<AnimeResult[]>([]);
   const [isComparing, setIsComparing] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
   const [quizScores, setQuizScores] = useState<Record<string, number>>({});
   
@@ -119,7 +122,8 @@ export default function App() {
       confetti({
         particleCount: confettiIntensity,
         spread: 70,
-        origin: { y: 0.6 }
+        origin: { y: 0.6 },
+        colors: CHARACTER_COLORS[result.characterName] || DEFAULT_COLORS
       });
       
       // Update history
@@ -431,22 +435,7 @@ export default function App() {
                     <p className="text-gray-400">{result.description}</p>
                 </div>
                 {TRAITS_MAP[result.characterName] && (
-                    <div className="h-64 mb-8">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={[
-                                { trait: 'Strength', value: TRAITS_MAP[result.characterName].strength },
-                                { trait: 'Intelligence', value: TRAITS_MAP[result.characterName].intelligence },
-                                { trait: 'Kindness', value: TRAITS_MAP[result.characterName].kindness },
-                                { trait: 'Power', value: TRAITS_MAP[result.characterName].power },
-                                { trait: 'Speed', value: TRAITS_MAP[result.characterName].speed },
-                            ]}>
-                                <PolarGrid stroke="#4a5568" />
-                                <PolarAngleAxis dataKey="trait" tick={{ fill: '#e2e8f0', fontSize: 12 }} />
-                                <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
-                                <Radar name="Traits" dataKey="value" stroke="#f472b6" fill="#f472b6" fillOpacity={0.6} />
-                            </RadarChart>
-                        </ResponsiveContainer>
-                    </div>
+                    <RadarChartComponent characterName={result.characterName} />
                 )}
                 <div className="flex gap-4">
                     <motion.button 
@@ -456,6 +445,12 @@ export default function App() {
                         whileTap={{ scale: 0.95 }}
                     >
                         Match again?
+                    </motion.button>
+                    <motion.button
+                        onClick={() => setIsShareModalOpen(true)}
+                        className="flex-none bg-[#1b1e27] text-white p-4 rounded-full border border-white/10 hover:border-pink-300 transition"
+                    >
+                        <Share2 className="w-5 h-5" />
                     </motion.button>
                     <motion.button
                         onClick={async () => {
@@ -476,57 +471,37 @@ export default function App() {
                     >
                         <Camera className="w-5 h-5" />
                     </motion.button>
-                    <motion.button
-                        onClick={async () => {
-                            playClickSound(isMuted);
-                            const shareData: ShareData = {
-                                title: 'My Anime Character Match',
-                                text: `Hey there, I got "${result.characterName}" in this app made by Pratyush Kushagra and Anish, wanna try? Go to the link-(https://anime-kushpraj.vercel.app/)`,
-                                url: 'https://anime-kushpraj.vercel.app/',
-                            };
-
-                            try {
-                                // Robustly try one of the provided images
-                                const imageUrls = ['https://wallpapercave.com/wp/wp5535573.jpg', 'https://wallpapercave.com/wp/wp1853123.jpg'];
-                                let file: File | null = null;
-                                
-                                for (const url of imageUrls) {
-                                    try {
-                                        const response = await fetch(url);
-                                        if (!response.ok) continue;
-                                        const blob = await response.blob();
-                                        file = new File([blob], 'matched-character.jpg', { type: blob.type });
-                                        break;
-                                    } catch (err) {
-                                        console.warn(`Could not fetch image from ${url}:`, err);
-                                    }
-                                }
-
-                                if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
-                                    shareData.files = [file];
-                                }
-                            } catch (err) {
-                                console.warn('Could not add image to share:', err);
-                            }
-
-                            try {
-                                if (navigator.share) {
-                                    await navigator.share(shareData);
-                                } else {
-                                    await navigator.clipboard.writeText(shareData.text);
-                                    alert('Link copied to clipboard!');
-                                }
-                            } catch (err) {
-                                console.error('Error sharing:', err);
-                            }
-                        }}
-                        className="flex-none bg-[#1b1e27] text-white p-4 rounded-full border border-white/10 hover:border-pink-300 transition"
-                    >
-                        <Share2 className="w-5 h-5" />
-                    </motion.button>
                 </div>
             </motion.div>
         )}
+      </AnimatePresence>
+      <AnimatePresence>
+          {isShareModalOpen && (
+              <ShareModal 
+                  result={result} 
+                  onClose={() => setIsShareModalOpen(false)} 
+                  onShare={async () => {
+                      // Move share logic here
+                      playClickSound(isMuted);
+                      const shareData: ShareData = {
+                          title: 'My Anime Character Match',
+                          text: `Hey there, I got "${result.characterName}" in this app made by Pratyush Kushagra and Anish, wanna try? Go to the link-(https://anime-kushpraj.vercel.app/)`,
+                          url: 'https://anime-kushpraj.vercel.app/',
+                      };
+                      try {
+                          if (navigator.share) {
+                              await navigator.share(shareData);
+                          } else {
+                              await navigator.clipboard.writeText(shareData.text);
+                              alert('Link copied to clipboard!');
+                          }
+                      } catch (err) {
+                          console.error('Error sharing:', err);
+                      }
+                      setIsShareModalOpen(false);
+                  }}
+              />
+          )}
       </AnimatePresence>
       <div 
         className="fixed bottom-20 text-sm font-bold z-10 transition-opacity opacity-100 uppercase tracking-wider"
