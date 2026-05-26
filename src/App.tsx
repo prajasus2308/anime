@@ -222,9 +222,22 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-black/70 text-white flex flex-col justify-center items-center p-6 font-sans pb-24">
-      <div className="fixed top-6 left-6 z-50 flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full backdrop-blur-md">
-        {currentUser && <span className="text-sm font-bold text-white">{currentUser}</span>}
-        {streak > 0 && <span className="text-xs bg-pink-500 text-white px-2 py-0.5 rounded-full font-bold">🔥 {streak}</span>}
+      <div className="fixed top-6 left-6 z-50 flex flex-col gap-2 bg-white/10 px-4 py-3 rounded-2xl backdrop-blur-md">
+         <div className="flex items-center gap-2">
+            {currentUser && <span className="text-sm font-bold text-white">{currentUser}</span>}
+            {streak > 0 && <span className="text-xs bg-pink-500 text-white px-2 py-0.5 rounded-full font-bold">🔥 {streak}</span>}
+         </div>
+         {(() => {
+            const uniqueCount = new Set(history.map(h => h.characterName)).size;
+            const nextTier = uniqueCount < 5 ? 5 : uniqueCount < 10 ? 10 : uniqueCount < 20 ? 20 : 20;
+            const currentTierBase = uniqueCount < 5 ? 0 : uniqueCount < 10 ? 5 : uniqueCount < 20 ? 10 : 20;
+            const progress = uniqueCount >= 20 ? 100 : Math.max(0, ((uniqueCount - currentTierBase) / (nextTier - currentTierBase)) * 100);
+            return uniqueCount < 20 && (
+                <div className="w-24 h-1.5 bg-black/50 rounded-full overflow-hidden">
+                   <div className="bg-pink-500 h-full rounded-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
+                </div>
+            );
+         })()}
       </div>
       <div className="fixed top-6 right-6 flex gap-2 z-50">
         <div className="flex items-center gap-2 bg-white/10 px-3 py-2 rounded-full">
