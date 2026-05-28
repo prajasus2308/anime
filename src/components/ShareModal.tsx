@@ -21,26 +21,34 @@ const ShareModal: React.FC<ShareModalProps> = ({ result, onClose, onShare }) => 
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.9, opacity: 0 }}
-        className="w-full max-w-md bg-[#111111] border border-white/10 rounded-3xl p-8 shadow-2xl relative"
+        className="w-full max-w-md bg-[#111111] border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden"
       >
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white">
-          <X className="w-6 h-6" />
-        </button>
-        <h2 className="text-xl font-bold mb-6 text-center text-pink-300">Share Your Match</h2>
-        <div className="text-center mb-6">
-          <div className="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-300 to-blue-300">
-            {result.characterName}
+        <motion.div
+          animate={{ backgroundPosition: ["0% 0%", "100% 100%", "0% 0%"] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+          className="absolute inset-0 z-0 bg-gradient-to-br from-pink-900/10 via-[#111111] to-blue-950/10"
+          style={{ backgroundSize: "200% 200%" }}
+        />
+        <div className="relative z-10">
+          <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white">
+            <X className="w-6 h-6" />
+          </button>
+          <h2 className="text-xl font-bold mb-6 text-center text-pink-300">Share Your Match</h2>
+          <div className="text-center mb-6">
+            <div className="text-3xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-300 to-blue-300">
+              {result.characterName}
+            </div>
+            <p className="italic text-gray-300">"{result.quote}"</p>
           </div>
-          <p className="italic text-gray-300">"{result.quote}"</p>
+          <RadarChartComponent characterName={result.characterName} />
+          <button
+            onClick={onShare}
+            className="w-full bg-pink-600 text-white font-semibold rounded-full p-4 flex items-center justify-center gap-2 hover:bg-pink-700 transition"
+          >
+            <Share2 className="w-5 h-5" />
+            Share Match
+          </button>
         </div>
-        <RadarChartComponent characterName={result.characterName} />
-        <button
-          onClick={onShare}
-          className="w-full bg-pink-600 text-white font-semibold rounded-full p-4 flex items-center justify-center gap-2 hover:bg-pink-700 transition"
-        >
-          <Share2 className="w-5 h-5" />
-          Share Match
-        </button>
       </motion.div>
     </motion.div>
   );

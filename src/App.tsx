@@ -280,7 +280,7 @@ export default function App() {
                     <select value={selectedSeries} onChange={(e) => setSelectedSeries(e.target.value)} className="w-full bg-[#1b1e27] text-white p-2 rounded-xl border border-white/5">
                         {["All", ...Array.from(new Set(history.map(h => CHARACTER_SERIES_MAP[h.characterName] || "Unknown")))].map(s => <option key={s} value={s}>{s}</option>)}
                     </select>
-                    <input type="text" placeholder="Search by character name..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-[#1b1e27] text-white p-2 rounded-xl border border-white/5" />
+                    <input type="text" placeholder="Search by character name..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="w-full bg-white/10 text-white p-2 rounded-xl border border-white/10 backdrop-blur-sm" />
                     {selectedMatches.length === 2 && (
                         <button onClick={() => setIsComparing(true)} className="w-full bg-pink-600 text-white p-2 rounded-xl border border-white/5">Compare Selected</button>
                     )}
@@ -397,7 +397,7 @@ export default function App() {
                             playClickSound(isMuted);
                          }
                       }}
-                      className="w-full bg-[#1b1e27] border border-[#2b303f] rounded-full p-4 text-center" 
+                      className="w-full bg-white/10 text-white border border-white/10 rounded-full p-4 text-center backdrop-blur-sm" 
                       placeholder={`Enter your ${mode}`} 
                       autoComplete="off" 
                     />
